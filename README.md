@@ -1,4 +1,4 @@
-# Golum (골름) - 상호작용 투표 커뮤니티 플랫폼
+# Golum - Interactive Voting Community Platform
 
 ## 1. Vision statement
 
