@@ -52,8 +52,10 @@
 ## 5. Github address
 
 - **Repository:** [https://github.com/KNUGolum/Golum_Back](https://github.com/KNUGolum/Golum_Back)
+<br>
 
 # User Story Map
 <br>
 
-<img width="1335" height="598" alt="스크린샷 2026-04-01 오후 7 46 25" src="https://github.com/user-attachments/assets/b6ae8cd3-bd53-4384-b1e8-c6df0f34c5da" />
+<img width="1391" height="628" alt="스크린샷 2026-04-01 오후 8 39 05" src="https://github.com/user-attachments/assets/93794b3f-4bbb-4fb9-91d0-8768fc10c32f" />
+
