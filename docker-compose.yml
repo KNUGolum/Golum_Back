@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: golum_db
+    environment:
+      POSTGRES_USER: golum_user
+      POSTGRES_PASSWORD: golum_password
+      POSTGRES_DB: golum_db
+    ports:
+      - "5434:5432" # 로컬 포트 5434을 사용 (기본 5432와 충돌 방지)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: golum_api
+    ports:
+      - "8002:8000" # 외부 접속은 8002번으로!
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

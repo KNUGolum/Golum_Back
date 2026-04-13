@@ -1,0 +1,56 @@
+# =========================
+# 1. Environment Variables (가장 중요 ⭐️)
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# 2. Virtual Environment
+# =========================
+venv/
+.venv/
+env/
+.env_venv/
+
+# =========================
+# 3. Python Cache & Build
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# =========================
+# 4. Database & Docker Local Volumes
+# =========================
+# (docker-compose에서 로컬 DB 볼륨을 매핑했다면 해당 폴더 제외)
+db_data/
+pgdata/
+postgres_data/
+
+# =========================
+# 5. IDE & OS (VS Code, Windows, Mac)
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# =========================
+# 6. Logs & Testing
+# =========================
+*.log
+.pytest_cache/
+coverage.xml
+htmlcov/
+.coverage

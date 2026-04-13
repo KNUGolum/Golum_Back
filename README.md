@@ -54,8 +54,78 @@
 - **Repository:** [https://github.com/KNUGolum/Golum_Back](https://github.com/KNUGolum/Golum_Back)
 <br>
 
-# User Story Map
+## 6. User Story Map
 <br>
 
-<img width="1391" height="628" alt="스크린샷 2026-04-01 오후 8 39 05" src="https://github.com/user-attachments/assets/93794b3f-4bbb-4fb9-91d0-8768fc10c32f" />
+<img width="1391" height="628" alt="스크린샷 2026-04-01 오후 8 39 05" src="https://github.com/user-attachments/assets/93794b3f-4bbb-4fb9-91d0-8768fc10c32f" />
+<br>
 
+## 7. Directory Structure
+
+본 프로젝트는 유지보수와 확장성을 고려하여 계층형(Layered) 아키텍처 구조를 따르고 있습니다.
+
+```text
+.
+├── app/
+│   ├── api/                  # API 라우팅 관련 폴더
+│   │   ├── endpoints/        # 엔드포인트 파일 모음
+│   │   ├── deps.py           # 공통 의존성 함수 관리
+│   │   └── routers.py        # 라우터 등록 및 통합
+│   ├── core/                 # 공통 설정 관리
+│   │   └── config.py         # 환경변수 및 설정값 관리
+│   ├── db/                   # 데이터베이스 연결 설정
+│   │   ├── base.py           # SQLAlchemy Base 정의
+│   │   └── session.py        # DB 세션 및 엔진 설정
+│   ├── models/               # 데이터베이스 모델 정의
+│   │   ├── __init__.py       # 모델 패키지 초기화
+│   │   ├── bet.py            # 베팅 관련 모델
+│   │   ├── poll.py           # 투표 관련 모델
+│   │   └── user.py           # 사용자 관련 모델
+│   └── main.py               # FastAPI 앱 실행 파일
+├── migrations/               # DB 마이그레이션 파일
+├── .env                      # 로컬 환경 변수 파일
+├── .env.example              # 환경 변수 예시 파일
+├── .gitignore                # Git 추적 제외 설정
+├── docker-compose.yml        # 컨테이너 실행 설정
+├── Dockerfile                # Docker 이미지 빌드 설정
+├── README.md                 # 프로젝트 설명 문서
+└── requirements.txt          # Python 패키지 목록
+```
+<br>
+
+## 8. Getting Started
+
+최초로 프로젝트를 Clone 받거나 Pull 받은 후, 로컬 환경에서 서버를 실행하기 위한 가이드입니다. 본 프로젝트는 Docker를 기반으로 구동되므로 로컬에 Docker가 설치되어 있어야 합니다.
+
+### Step 1. Clone & Environment Setup
+```bash
+# 1. 저장소 클론
+git clone [https://github.com/KNUGolum/Golum_Back.git](https://github.com/KNUGolum/Golum_Back.git)
+cd Golum_Back
+
+# 2. 환경변수 세팅
+# 최상단 루트 디렉토리에 .env 파일을 생성하고 필요한 환경변수를 입력합니다.
+# (DB 연결 주소, JWT Secret Key 등 - 팀 내 공유된 키 사용)
+```
+
+### Step 2. Build & Run Docker Containers
+```bash
+# 백그라운드에서 DB와 웹 서버 컨테이너 빌드 및 실행
+docker-compose up --build -d
+```
+
+### Step 3. Database Migration
+최초 실행 시 DB에 테이블이 없는 상태이므로, Alembic을 이용해 테이블을 생성해주어야 합니다.
+```bash
+# 컨테이너 내부의 web 서비스에 접속하여 최신 마이그레이션 적용
+docker-compose exec web alembic upgrade head
+```
+
+### Step 4. API Docs Check
+서버가 정상적으로 구동되었다면 브라우저를 열고 아래 주소로 접속합니다.
+- **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs) (로컬 포트 매핑에 따라 다를 수 있습니다)
+- 이곳에서 API 명세서를 확인하고 직접 테스트(Try it out)해 볼 수 있습니다.
+
+### Step 5. Branch & PR Workflow
+- 새로운 기능 개발 시 `main` 브랜치에서 새로운 `feature/기능명` 브랜치를 파서 작업합니다.
+- 작업 완료 후 Github에 Push 하고, 코드 리뷰를 요청하여 승인(Approve) 후 머지하는 흐름으로 진행합니다.
