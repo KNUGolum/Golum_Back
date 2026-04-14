@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app.api.deps import getDb
-from app.schemas.user import UserCreate, UserResponse, EmailCheckRequest, NicknameCheckRequest
+from app.api.deps import getDb, getCurrentUser
+from app.schemas.user import UserCreate, UserResponse, EmailCheckRequest, NicknameCheckRequest, SignInRequest, TokenResponse
 from app.crud import user as userCrud
+from app.core.security import verifyPassword, createAccessToken
+from app.models.user import User
 
 router = APIRouter()
 
@@ -48,3 +51,37 @@ def signUp(userIn: UserCreate, db: Session = Depends(getDb)):
         
     newUser = userCrud.createUser(db=db, userIn=userIn)
     return newUser
+
+
+@router.post("/signin", response_model=TokenResponse, status_code=status.HTTP_200_OK)
+def signIn(request: SignInRequest, db: Session = Depends(getDb)):
+    user = userCrud.getUserByEmail(db, email=request.email)
+    
+    if not user or not verifyPassword(request.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="이메일 또는 비밀번호가 올바르지 않습니다."
+        )
+    
+    token = createAccessToken(subject=user.id)
+    
+    return {
+        "accessToken": token,
+        "tokenType": "bearer"
+    }
+
+@router.post("/login/swagger", include_in_schema=False)
+def swaggerLogin(formData: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(getDb)):
+    user = userCrud.getUserByEmail(db, email=formData.username)
+    if not user or not verifyPassword(formData.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="이메일 또는 비밀번호가 올바르지 않습니다."
+        )
+    
+    token = createAccessToken(subject=user.id)
+    return {"access_token": token, "token_type": "bearer"}
+
+@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
+def getMyInfo(currentUser: User = Depends(getCurrentUser)):
+    return currentUser

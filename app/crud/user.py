@@ -26,3 +26,6 @@ def createUser(db: Session, userIn: UserCreate):
     db.refresh(newUser)
     
     return newUser
+
+def getUserById(db: Session, userId: int):
+    return db.query(User).filter(User.id == userId).first()
