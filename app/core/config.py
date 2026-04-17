@@ -6,13 +6,11 @@ load_dotenv()
 
 class Settings:
     PROJECT_NAME: str = "Golum"
-
     # DB 연결 주소 (.env에 없으면 기본값 사용)
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL", 
         "postgresql://golum_user:golum_password@db:5432/golum_db"
     )
-
     # JWT 암호화 키
     SECRET_KEY: str = os.getenv("SECRET_KEY", "fallback-secret-key")
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
