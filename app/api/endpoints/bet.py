@@ -25,6 +25,13 @@ async def createBetParticipation(
             amount=betData.amount
         )
 
+        # PR 피드백 반영 - 투표 미참여 유저 처리
+        if result == "NOT_VOTED":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="투표에 참여한 유저만 배팅할 수 있습니다."
+            )
+
         if result == "INSUFFICIENT_CREDIT":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -47,6 +54,8 @@ async def createBetParticipation(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"데이터베이스 처리 중 오류가 발생했습니다: {str(databaseError)}"
         )
+    except HTTPException:
+        raise
     except Exception as unexpectedError:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
