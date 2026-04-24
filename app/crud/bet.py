@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from app.models.bet import Bet
+from app.models.bet import Bet, Vote
 from app.models.user import User
 
 def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int):
@@ -9,7 +9,16 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
         
         if not user:
             return None, "USER_NOT_FOUND"
+    
+        # PR 피드백 반영 - 투표 참여 여부 확인
+        hasVoted = db.query(Vote).filter(
+            Vote.user_id == userId, 
+            Vote.poll_id == pollId
+        ).first()
 
+        if not hasVoted:
+            return None, "NOT_VOTED"
+        
         if user.credit < amount:
             return None, "INSUFFICIENT_CREDIT"
 
