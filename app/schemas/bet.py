@@ -9,8 +9,7 @@ class BetResult(str, Enum):
     LOSE = "LOSE"
 
 class BetCreate(BaseModel):
-    pollId: int
-    optionId: int
+    optionId: str = Field(..., pattern="^[AB]$")
     amount: int = Field(..., gt=0)
 
 class BetResponse(BaseModel):
