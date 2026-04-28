@@ -8,4 +8,9 @@ passlib[bcrypt]
 bcrypt==3.2.2
 python-multipart
 python-dotenv
+<<<<<<< HEAD
 apscheduler
+=======
+apscheduler
+websockets
+>>>>>>> pr-36

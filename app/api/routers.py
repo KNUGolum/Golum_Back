@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from app.api.endpoints import auth, poll, vote
 =======
 from app.api.endpoints import auth, vote, bet
@@ -8,10 +9,14 @@ from app.api.endpoints import auth, vote, bet
 =======
 from app.api.endpoints import auth, vote, bet, poll_result
 >>>>>>> pr-35
+=======
+from app.api.endpoints import auth, vote, bet, poll_result, payout, websocket
+>>>>>>> pr-36
 
 apiRouter = APIRouter()
 
 apiRouter.include_router(auth.router, prefix="/auth", tags=["auth"])
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 apiRouter.include_router(poll.router, prefix="/poll", tags=["poll"])
@@ -29,3 +34,10 @@ apiRouter.include_router(
     tags=["pollResult"]  
 )
 >>>>>>> pr-35
+=======
+apiRouter.include_router(vote.router, prefix="/poll", tags=["Vote"])
+apiRouter.include_router(bet.router, prefix="/bets", tags=["bet"])
+apiRouter.include_router(poll_result.router, prefix="/poll", tags=["pollResult"])
+apiRouter.include_router(payout.router, prefix="/payout", tags=["payout"])
+apiRouter.include_router(websocket.router, tags=["WebSocket"])
+>>>>>>> pr-36
