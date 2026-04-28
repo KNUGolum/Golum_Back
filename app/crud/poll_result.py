@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
+from datetime import datetime
+
 from app.models.poll import Poll, PollOption
 from app.models.bet import Vote
 
@@ -12,6 +14,11 @@ def evaluatePollResult(db: Session, pollId: int):
         
         if poll.status in ["ENDED", "INVALID"]: 
             return None, "ALREADY_EVALUATED"
+        
+        # PR 피드백 반영 - 종료 후 판정
+        currentTime = datetime.now()
+        if currentTime < poll.end_time:
+            return None, "POLL_STILL_ONGOING"
 
         options = db.query(PollOption).filter(PollOption.poll_id == pollId).order_by(PollOption.id).all()
         if len(options) < 2:
@@ -39,13 +46,11 @@ def evaluatePollResult(db: Session, pollId: int):
 
         db.commit()
 
-        resultData = {
+        return {
             "pollResultStatus": resultStatus,
             "winningOptionId": winningOptionId,
             "totalVoteCount": totalVotes
-        }
-        
-        return resultData, "SUCCESS"
+        }, "SUCCESS"
 
     except SQLAlchemyError as databaseError:
         db.rollback()

@@ -28,5 +28,5 @@ def check_and_evaluate_polls():
         db.close()
 
 scheduler = BackgroundScheduler()
-# 간격(minutes)은 조정 가능. 임의값 60분으로 설정함.
-scheduler.add_job(check_and_evaluate_polls, 'interval', minutes=60)
+# 간격(minutes)은 조정 가능. 임의값 1분으로 수정함.
+scheduler.add_job(check_and_evaluate_polls, 'interval', minutes=1)

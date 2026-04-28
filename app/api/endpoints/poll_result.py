@@ -18,6 +18,12 @@ async def evaluatePoll(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail="존재하지 않는 투표입니다."
         )
+    # PR 피드백 반영 - 종료 후 판정
+    if statusMsg == "POLL_STILL_ONGOING":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="아직 투표가 종료되지 않았습니다."
+        )
     if statusMsg == "ALREADY_EVALUATED":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
