@@ -33,8 +33,8 @@ def updatePollRatio(db: Session, pollId: int):
             return None, "NO_VOTES"
 
         # 4 비율 계산
-        option1Ratio = voteCountA / totalVotes
-        option2Ratio = voteCountB / totalVotes
+        option1Ratio = round((voteCountA / totalVotes),2)
+        option2Ratio = round((voteCountB / totalVotes),2)
 
         # 5 poll_stats 업데이트
         pollStat = db.query(PollStat).filter(PollStat.poll_id ==
