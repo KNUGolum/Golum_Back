@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.deps import getDb, getCurrentUser
-from app.schemas.bet import BetCreate, BetActionResponse
+from app.schemas.bet import BetCreate, BetActionResponse, BetResponse
 from app.crud import bet as crudBet
 from app.models.user import User
 
@@ -46,7 +46,15 @@ async def createBetParticipation(
 
         return BetActionResponse(
             message="배팅 참여 보상으로 100 크레딧이 지급되었습니다.",
-            betDetails=bet
+            betDetails=BetResponse(
+            id=bet.id,
+            userId=bet.user_id,      
+            pollId=bet.poll_id,      
+            optionId=bet.option_id,
+            amount=bet.amount,
+            result=bet.result,
+            createdAt=bet.created_at 
+            )
         )
 
     except SQLAlchemyError as databaseError:
