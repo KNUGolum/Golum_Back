@@ -27,4 +27,12 @@ class SignInRequest(BaseModel):
 
 class TokenResponse(BaseModel):
     accessToken: str
+    refreshToken: str
+    tokenType: str
+
+class TokenReissueRequest(BaseModel):
+    refreshToken: str
+
+class AccessTokenResponse(BaseModel):
+    accessToken: str
     tokenType: str
