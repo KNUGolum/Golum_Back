@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.user import User
+from app.models.user import User, AuthToken
 from app.schemas.user import UserCreate
 from app.core.security import hashPassword
 
@@ -29,3 +29,25 @@ def createUser(db: Session, userIn: UserCreate):
 
 def getUserById(db: Session, userId: int):
     return db.query(User).filter(User.id == userId).first()
+
+def upsertRefreshToken(db: Session, userId: int, refreshToken: str, expiresAt):
+    authToken = db.query(AuthToken).filter(AuthToken.user_id == userId).first()
+
+    if authToken:
+        authToken.refresh_token = refreshToken
+        authToken.expires_at = expiresAt
+    else:
+        authToken = AuthToken(
+            user_id=userId,
+            refresh_token=refreshToken,
+            expires_at=expiresAt
+        )
+        db.add(authToken)
+
+    db.commit()
+    db.refresh(authToken)
+
+    return authToken
+
+def getAuthTokenByUserId(db: Session, userId: int):
+    return db.query(AuthToken).filter(AuthToken.user_id == userId).first()
