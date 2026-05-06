@@ -57,7 +57,8 @@
 ## 6. User Story Map
 <br>
 
-<img width="1391" height="628" alt="스크린샷 2026-04-01 오후 8 39 05" src="https://github.com/user-attachments/assets/93794b3f-4bbb-4fb9-91d0-8768fc10c32f" />
+<img width="1066" height="457" alt="스크린샷 2026-05-06 오후 3 58 14" src="https://github.com/user-attachments/assets/08a74d8e-9aaf-4fe7-8d0e-d1ba8df2e48d" />
+
 <br>
 
 ## 7. Directory Structure
