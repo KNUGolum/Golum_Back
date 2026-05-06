@@ -115,18 +115,11 @@ cd Golum_Back
 docker-compose up --build -d
 ```
 
-### Step 3. Database Migration
-최초 실행 시 DB에 테이블이 없는 상태이므로, Alembic을 이용해 테이블을 생성해주어야 합니다.
-```bash
-# 컨테이너 내부의 web 서비스에 접속하여 최신 마이그레이션 적용
-docker-compose exec web alembic upgrade head
-```
-
-### Step 4. API Docs Check
+### Step 3. API Docs Check
 서버가 정상적으로 구동되었다면 브라우저를 열고 아래 주소로 접속합니다.
 - **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs) (로컬 포트 매핑에 따라 다를 수 있습니다)
 - 이곳에서 API 명세서를 확인하고 직접 테스트(Try it out)해 볼 수 있습니다.
 
-### Step 5. Branch & PR Workflow
+### Step 4. Branch & PR Workflow
 - 새로운 기능 개발 시 `main` 브랜치에서 새로운 `feature/기능명` 브랜치를 파서 작업합니다.
 - 작업 완료 후 Github에 Push 하고, 코드 리뷰를 요청하여 승인(Approve) 후 머지하는 흐름으로 진행합니다.
