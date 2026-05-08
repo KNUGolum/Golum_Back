@@ -5,7 +5,7 @@ from app.db.session import SessionLocal
 from app.models.poll import Poll
 from app.models.bet import Bet 
 # [임시 주석 처리] poll_result PR 머지 후 해제 예정
-# from app.crud.poll_result import evaluatePollResult
+from app.crud.poll_result import evaluatePollResult
 from app.crud.payout import payoutDividends 
 from app.core.websocket import manager 
 
@@ -50,21 +50,21 @@ def check_and_evaluate_polls():
             
             # 1단계: 승패 판정
             # [임시 주석 처리] poll_result PR 머지 후 해제 예정
-            # eval_result, eval_msg = evaluatePollResult(db=db, pollId=poll.id)
+            eval_result, eval_msg = evaluatePollResult(db=db, pollId=poll.id)
             
-            # if eval_msg == "SUCCESS":
-            #     # 2단계: 자동 정산 실행
-            #     payout_result, payout_msg = payoutDividends(db=db, pollId=poll.id)
+            if eval_msg == "SUCCESS":
+                # 2단계: 자동 정산 실행
+                payout_result, payout_msg = payoutDividends(db=db, pollId=poll.id)
                 
-            #     if payout_msg == "SUCCESS":
-            #         print(f"[Scheduler] Poll ID {poll.id} - 정산 완료 (수혜자: {payout_result['payoutUserCount']}명)")
+                if payout_msg == "SUCCESS":
+                    print(f"[Scheduler] Poll ID {poll.id} - 정산 완료 (수혜자: {payout_result['payoutUserCount']}명)")
                     
-            #         # 3단계: 실시간 알림 전송 (비동기 함수 실행)
-            #         asyncio.run(send_notifications(db, poll.id, payout_result))
-            #     else:
-            #         print(f"[Scheduler] Poll ID {poll.id} - 정산 실패: {payout_msg}")
-            # else:
-            #     print(f"[Scheduler] Poll ID {poll.id} - 판정 실패: {eval_msg}")
+                    # 3단계: 실시간 알림 전송 (비동기 함수 실행)
+                    asyncio.run(send_notifications(db, poll.id, payout_result))
+                else:
+                    print(f"[Scheduler] Poll ID {poll.id} - 정산 실패: {payout_msg}")
+            else:
+                print(f"[Scheduler] Poll ID {poll.id} - 판정 실패: {eval_msg}")
 
     except Exception as e:
         print(f"[Scheduler] 오류 발생: {e}")
@@ -72,4 +72,5 @@ def check_and_evaluate_polls():
         db.close()
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(check_and_evaluate_polls, 'interval', minutes=60)
+# 간격(minutes)은 조정 가능. 임의값 1분으로 수정함.
+scheduler.add_job(check_and_evaluate_polls, 'interval', minutes=1)

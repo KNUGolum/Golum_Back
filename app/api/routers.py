@@ -1,5 +1,7 @@
 from fastapi import APIRouter
-from app.api.endpoints import auth, vote, bet, poll_result, payout, websocket
+from app.api.endpoints import auth, poll, vote, bet, poll_result, payout, websocket
+# 나중에 polls, bets 라우터도 만들면 여기서 import 합니다.
+# from app.api.endpoints import polls, bets
 
 apiRouter = APIRouter()
 
@@ -9,3 +11,5 @@ apiRouter.include_router(bet.router, prefix="/bets", tags=["bet"])
 apiRouter.include_router(poll_result.router, prefix="/poll", tags=["pollResult"])
 apiRouter.include_router(payout.router, prefix="/payout", tags=["payout"])
 apiRouter.include_router(websocket.router, tags=["WebSocket"])
+apiRouter.include_router(poll.router, prefix="/poll", tags=["poll"])
+
