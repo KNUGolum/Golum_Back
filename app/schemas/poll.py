@@ -12,3 +12,19 @@ class PollCreateResponse(BaseModel):
     pollId: int
     # creatorId: int
     endTime: datetime
+
+class PollListItem(BaseModel):
+    pollId: int
+    title: str
+    optionA: str
+    optionB: str
+    status: str
+    totalVotes: int
+    # creatorId: int
+    endTime: datetime
+    createdAt: datetime
+
+class PollListResponse(BaseModel):
+    totalCount: int
+    currentPage: int
+    polls: list[PollListItem]
