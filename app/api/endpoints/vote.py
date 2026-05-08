@@ -38,6 +38,11 @@ async def submitVote(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="종료된 투표에는 참여할 수 없습니다."
         )
+    if result == "CREATOR_CANNOT_VOTE":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="자신이 만든 투표에는 참여할 수 없습니다."
+        )
 
     return VoteResponse(
         message="투표 성공! 100 크레딧이 지급되었습니다.",

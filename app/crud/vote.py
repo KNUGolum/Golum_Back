@@ -20,6 +20,8 @@ def createVote(db: Session, pollId: int, userId: int, selection: str):
         isPollEnded = poll.end_time and poll.end_time <= datetime.now()
         if poll.status != POLL_STATUS_ONGOING or isPollEnded:
             return None, "POLL_CLOSED"
+        if poll.creator_id == userId:
+            return None, "CREATOR_CANNOT_VOTE"
 
         # 1. 중복 투표 체크 (Vote 도메인 고유 로직이므로 직접 쿼리)
         alreadyVoted = db.query(Vote).filter(Vote.poll_id == pollId, Vote.user_id == userId).first()
