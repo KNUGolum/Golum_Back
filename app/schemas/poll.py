@@ -10,7 +10,7 @@ class PollCreateRequest(BaseModel):
 class PollCreateResponse(BaseModel):
     message: str
     pollId: int
-    # creatorId: int
+    creatorId: int
     endTime: datetime
 
 class PollListItem(BaseModel):

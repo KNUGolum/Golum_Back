@@ -4,15 +4,17 @@ from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
 
 from app.schemas.poll import PollCreateRequest, PollCreateResponse, PollListResponse
-from app.api.deps import getDb
+from app.api.deps import getCurrentUser, getDb
 from app.crud import poll as crudPoll
+from app.models.user import User
 
 router = APIRouter()
 
 @router.post("", response_model=PollCreateResponse, status_code=status.HTTP_201_CREATED)
 async def createPoll(
     pollData: PollCreateRequest,
-    db: Session = Depends(getDb)
+    db: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser)
 ):
     try:
         currentTime = datetime.now()
@@ -25,13 +27,13 @@ async def createPoll(
             db=db, 
             pollData=pollData, 
             endTime=endTime, 
-            # creatorId=currentUserId
+            creatorId=currentUser.id
         )
         
         return PollCreateResponse(
             message="투표 게시물이 성공적으로 생성되었습니다.",
             pollId=createdPoll.id,
-            # creatorId=createdPoll.creator_id,
+            creatorId=createdPoll.creator_id,
             endTime=createdPoll.end_time
         )
         

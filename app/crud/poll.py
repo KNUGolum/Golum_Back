@@ -6,12 +6,12 @@ from datetime import datetime
 from app.models.poll import Poll, PollOption, PollStat
 from app.schemas.poll import PollCreateRequest
 
-def createPoll(db: Session, pollData: PollCreateRequest, endTime: datetime) -> Poll: # creatorId: int 추가할 예정
+def createPoll(db: Session, pollData: PollCreateRequest, endTime: datetime, creatorId: int) -> Poll:
     try:
         dbPoll = Poll(
             title=pollData.title,
             end_time=endTime,
-            # creator_id=creatorId
+            creator_id=creatorId
         )
         db.add(dbPoll)
         db.flush()
