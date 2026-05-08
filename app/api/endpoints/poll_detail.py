@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import getCurrentUser, getDb
+from app.core.time import now_kst_naive
 from app.crud import poll_detail as pollDetailCrud
 from app.models.bet import Bet, Vote
 from app.models.poll import Poll, PollOption
@@ -35,7 +36,7 @@ def readPollDetail(
             detail="Poll detail requires exactly two options",
         )
 
-    now = datetime.utcnow()
+    now = now_kst_naive()
     isEnded = pollDetailCrud.isPollEnded(poll, now)
     effectiveStatus = getEffectiveStatus(poll, isEnded)
     remainingSeconds = getRemainingSeconds(poll, isEnded, now)
@@ -50,6 +51,7 @@ def readPollDetail(
     winnerOptionId, isDraw = getPollResult(options, isEnded)
 
     isActive = not isEnded and poll.status == POLL_STATUS_ONGOING
+    isCreator = poll.creator_id == currentUser.id
     myVote = (
         databaseSession.query(Vote)
         .filter(Vote.poll_id == pollId, Vote.user_id == currentUser.id)
@@ -60,10 +62,9 @@ def readPollDetail(
         .filter(Bet.poll_id == pollId, Bet.user_id == currentUser.id)
         .first()
     )
-    hasVoted = myVote is not None
-    hasBet = myBet is not None
-    isCreator = poll.creator_id == currentUser.id
-    mySelection = getMySelection(options, myVote)
+    hasVoted = myVote is not None and not isCreator
+    hasBet = myBet is not None and not isCreator
+    mySelection = None if isCreator else getMySelection(options, myVote)
 
     return PollDetailResponse(
         id=poll.id,

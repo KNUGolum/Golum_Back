@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.core.time import now_kst_naive
 from app.models.bet import Vote
 from app.models.poll import Poll, PollOption, PollStat
 from app.models.user import User
@@ -17,7 +16,7 @@ def createVote(db: Session, pollId: int, userId: int, selection: str):
         poll = db.query(Poll).filter(Poll.id == pollId).first()
         if not poll:
             return None, "INVALID_POLL"
-        isPollEnded = poll.end_time and poll.end_time <= datetime.now()
+        isPollEnded = poll.end_time and poll.end_time <= now_kst_naive()
         if poll.status != POLL_STATUS_ONGOING or isPollEnded:
             return None, "POLL_CLOSED"
         if poll.creator_id == userId:

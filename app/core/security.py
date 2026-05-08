@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Union, Any
 from jose import jwt
 from passlib.context import CryptContext
@@ -15,9 +15,9 @@ def verifyPassword(plainPassword: str, hashedPassword: str) -> bool:
 
 def createAccessToken(subject: Union[str, Any], expiresDelta: timedelta = None) -> str:
     if expiresDelta:
-        expire = datetime.utcnow() + expiresDelta
+        expire = datetime.now(timezone.utc) + expiresDelta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     
     # payload에 만료시간(exp)과 유저 식별자(sub)를 담습니다.
     toEncode = {"exp": expire, "sub": str(subject)}
@@ -26,9 +26,9 @@ def createAccessToken(subject: Union[str, Any], expiresDelta: timedelta = None) 
 
 def createRefreshToken(subject: Union[str, Any], expiresDelta: timedelta = None) -> str:
     if expiresDelta:
-        expire = datetime.utcnow() + expiresDelta
+        expire = datetime.now(timezone.utc) + expiresDelta
     else:
-        expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
     toEncode = {
         "exp": expire,

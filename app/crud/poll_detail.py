@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.core.time import now_kst_naive
 from app.models.bet import Bet, Vote
 from app.models.poll import Poll, PollOption
 
@@ -67,5 +68,5 @@ def isPollEnded(poll: Poll, now: datetime | None = None) -> bool:
     if poll.end_time is None:
         return False
 
-    now = now or datetime.utcnow()
+    now = now or now_kst_naive()
     return poll.end_time <= now

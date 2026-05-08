@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
-from datetime import datetime
 
+from app.core.time import now_kst_naive
 from app.models.poll import Poll, PollOption
 from app.models.bet import Vote
 
@@ -16,7 +16,7 @@ def evaluatePollResult(db: Session, pollId: int):
             return None, "ALREADY_EVALUATED"
         
         # PR 피드백 반영 - 종료 후 판정
-        currentTime = datetime.now()
+        currentTime = now_kst_naive()
         if currentTime < poll.end_time:
             return None, "POLL_STILL_ONGOING"
 

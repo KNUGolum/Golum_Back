@@ -1,7 +1,7 @@
 import asyncio
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
 from app.db.session import SessionLocal 
+from app.core.time import now_kst_naive
 from app.models.poll import Poll
 from app.models.bet import Bet 
 # [임시 주석 처리] poll_result PR 머지 후 해제 예정
@@ -36,7 +36,7 @@ async def send_notifications(db, poll_id, result_data):
 def check_and_evaluate_polls():
     db = SessionLocal()
     try:
-        now = datetime.now()
+        now = now_kst_naive()
         expired_polls = db.query(Poll).filter(
             Poll.status == 'ONGOING',
             Poll.end_time <= now

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -76,7 +76,7 @@ def signIn(request: SignInRequest, db: Session = Depends(getDb)):
     
     accessToken = createAccessToken(subject=user.id)
     refreshToken = createRefreshToken(subject=user.id)
-    refreshTokenExpiresAt = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    refreshTokenExpiresAt = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
     userCrud.upsertRefreshToken(
         db=db,
@@ -129,7 +129,7 @@ def reissueAccessToken(request: TokenReissueRequest, db: Session = Depends(getDb
             detail="refresh token이 일치하지 않습니다."
         )
 
-    if authToken.expires_at.replace(tzinfo=None) < datetime.utcnow():
+    if authToken.expires_at.astimezone(timezone.utc) < datetime.now(timezone.utc):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="refresh token이 만료되었습니다."

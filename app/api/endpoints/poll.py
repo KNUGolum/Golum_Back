@@ -1,11 +1,12 @@
 from fastapi import APIRouter, status, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from app.schemas.poll import PollCreateRequest, PollCreateResponse, PollListResponse
 from app.api.deps import getCurrentUser, getDb
 from app.crud import poll as crudPoll
+from app.core.time import now_kst_naive
 from app.models.user import User
 
 router = APIRouter()
@@ -17,7 +18,7 @@ async def createPoll(
     currentUser: User = Depends(getCurrentUser)
 ):
     try:
-        currentTime = datetime.now()
+        currentTime = now_kst_naive()
         endTime = currentTime + timedelta(hours=pollData.durationHours)
         
         # 향후 인증 로직이 추가되면 해당 유저의 ID로 대체
