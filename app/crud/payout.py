@@ -25,7 +25,7 @@ def payoutDividends(db: Session, pollId: int, multiplier: float = DEFAULT_DIVIDE
             return None, "POLL_NOT_ENDED"
 
         options = db.query(PollOption).filter(PollOption.poll_id == pollId).all()
-        if len(options) < 2:
+        if len(options) != 2:
             return None, "INVALID_POLL_OPTIONS"
 
         opt1, opt2 = options[0], options[1]

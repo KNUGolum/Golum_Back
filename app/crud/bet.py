@@ -1,8 +1,12 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from app.models.bet import Bet, Vote
 from app.models.user import User
-from app.models.poll import PollOption
+from app.models.poll import Poll, PollOption
+
+POLL_STATUS_ONGOING = "ONGOING"
 
 def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int):
     try:
@@ -10,10 +14,21 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
         
         if not user:
             return None, "USER_NOT_FOUND"
+
+        if amount <= 0:
+            return None, "INVALID_AMOUNT"
+
+        poll = db.query(Poll).filter(Poll.id == pollId).first()
+        if not poll:
+            return None, "POLL_NOT_FOUND"
+
+        isPollEnded = poll.end_time and poll.end_time <= datetime.now()
+        if poll.status != POLL_STATUS_ONGOING or isPollEnded:
+            return None, "POLL_CLOSED"
         
         # PR 피드백 반영 - A/B 선택
         options = db.query(PollOption).filter(PollOption.poll_id == pollId).order_by(PollOption.id).all()
-        if len(options) < 2:
+        if len(options) != 2:
             return None, "INVALID_POLL_OPTIONS"
         
         realOptionId = options[0].id if optionId == "A" else options[1].id
@@ -26,6 +41,14 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
 
         if not hasVoted:
             return None, "NOT_VOTED"
+
+        alreadyBet = db.query(Bet).filter(
+            Bet.user_id == userId,
+            Bet.poll_id == pollId
+        ).first()
+
+        if alreadyBet:
+            return None, "ALREADY_BET"
         
         if user.credit < amount:
             return None, "INSUFFICIENT_CREDIT"
