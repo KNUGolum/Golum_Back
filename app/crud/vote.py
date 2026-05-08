@@ -1,14 +1,26 @@
-from sqlalchemy.orm import Session
+from datetime import datetime
+
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+
 from app.models.bet import Vote
-from app.models.poll import PollOption, PollStat
+from app.models.poll import Poll, PollOption, PollStat
 from app.models.user import User
 
 # from app.crud import poll as crudPoll
 # from app.crud import user as crudUser
 
+POLL_STATUS_ONGOING = "ONGOING"
+
 def createVote(db: Session, pollId: int, userId: int, selection: str):
     try:
+        poll = db.query(Poll).filter(Poll.id == pollId).first()
+        if not poll:
+            return None, "INVALID_POLL"
+        isPollEnded = poll.end_time and poll.end_time <= datetime.now()
+        if poll.status != POLL_STATUS_ONGOING or isPollEnded:
+            return None, "POLL_CLOSED"
+
         # 1. 중복 투표 체크 (Vote 도메인 고유 로직이므로 직접 쿼리)
         alreadyVoted = db.query(Vote).filter(Vote.poll_id == pollId, Vote.user_id == userId).first()
         if alreadyVoted:
@@ -21,11 +33,12 @@ def createVote(db: Session, pollId: int, userId: int, selection: str):
         if not options or len(options) < 2:
             return None, "INVALID_POLL"
         
-        targetOptionId = options[0].id if selection == "A" else options[1].id
+        targetOption = options[0] if selection == "A" else options[1]
 
         # 3. 투표 기록 생성
-        newVote = Vote(user_id=userId, poll_id=pollId, option_id=targetOptionId)
+        newVote = Vote(user_id=userId, poll_id=pollId, option_id=targetOption.id)
         db.add(newVote)
+        targetOption.vote_count = (targetOption.vote_count or 0) + 1
 
         # 4. 유저 크레딧 지급 (참여 보상 +100)
         # crudUser.addCredit(db, userId=userId, amount=100) 

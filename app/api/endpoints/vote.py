@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import getDb
+from app.api.deps import getCurrentUser, getDb
 
 from app.schemas.vote import VoteRequest, VoteResponse, VoteDetails
 from app.crud.vote import createVote
+from app.models.user import User
 
 router = APIRouter()
 
@@ -12,16 +13,13 @@ router = APIRouter()
 async def submitVote(
     pollId: int,
     voteData: VoteRequest,
-    db: Session = Depends(getDb)
-    # currentUser: User = Depends(getCurrentUser)
+    db: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser)
 ):
-    # 테스트용 현재 유저 아이디(db에 동일 아이디 값이 있는 유저가 있어야함)
-    tempUserId = 2
-    
     vote, result = createVote(
         db=db, 
         pollId=pollId, 
-        userId=tempUserId, 
+        userId=currentUser.id, 
         selection=voteData.selection
     )
     
@@ -34,6 +32,11 @@ async def submitVote(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail="투표 정보를 찾을 수 없거나 선택지가 부족합니다."
+        )
+    if result == "POLL_CLOSED":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="종료된 투표에는 참여할 수 없습니다."
         )
 
     return VoteResponse(
