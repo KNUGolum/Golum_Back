@@ -15,7 +15,7 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
         if not user:
             return None, "USER_NOT_FOUND"
 
-        if amount <= 0:
+        if amount < 0:
             return None, "INVALID_AMOUNT"
 
         poll = db.query(Poll).filter(Poll.id == pollId).first()
@@ -34,13 +34,16 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
         realOptionId = options[0].id if optionId == "A" else options[1].id
     
         # PR 피드백 반영 - 투표 참여 여부 확인
-        hasVoted = db.query(Vote).filter(
+        vote = db.query(Vote).filter(
             Vote.user_id == userId, 
             Vote.poll_id == pollId
         ).first()
 
-        if not hasVoted:
+        if not vote:
             return None, "NOT_VOTED"
+
+        if vote.option_id != realOptionId:
+            return None, "VOTE_OPTION_MISMATCH"
 
         alreadyBet = db.query(Bet).filter(
             Bet.user_id == userId,
@@ -64,7 +67,8 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
         db.add(newBet)
 
         # 배팅 참여 크레딧 지급 (임시로 100포인트 설정함)
-        user.credit += 100
+        if amount > 0:
+            user.credit += 100
 
         db.commit()
         db.refresh(newBet)

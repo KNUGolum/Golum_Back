@@ -10,7 +10,7 @@ class BetResult(str, Enum):
 
 class BetCreate(BaseModel):
     optionId: str = Field(..., pattern="^[AB]$")
-    amount: int = Field(..., gt=0)
+    amount: int = Field(..., ge=0)
 
 class BetResponse(BaseModel):
     id: int
