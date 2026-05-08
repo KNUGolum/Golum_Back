@@ -3,9 +3,11 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import getDb
+from app.api.deps import getCurrentUser, getDb
 from app.crud import poll_detail as pollDetailCrud
+from app.models.bet import Bet, Vote
 from app.models.poll import Poll, PollOption
+from app.models.user import User
 from app.schemas.poll_detail import PollDetailResponse, PollOptionDetail, PollStatus
 
 POLL_STATUS_ONGOING = "ONGOING"
@@ -17,6 +19,7 @@ router = APIRouter()
 def readPollDetail(
     pollId: int,
     databaseSession: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser),
 ):
     poll = pollDetailCrud.getPoll(databaseSession, pollId)
     if poll is None:
@@ -46,7 +49,21 @@ def readPollDetail(
     optionDetails = buildOptionDetails(options, betCreditsByOption)
     winnerOptionId, isDraw = getPollResult(options, isEnded)
 
-    canParticipate = not isEnded and poll.status == POLL_STATUS_ONGOING
+    isActive = not isEnded and poll.status == POLL_STATUS_ONGOING
+    myVote = (
+        databaseSession.query(Vote)
+        .filter(Vote.poll_id == pollId, Vote.user_id == currentUser.id)
+        .first()
+    )
+    myBet = (
+        databaseSession.query(Bet)
+        .filter(Bet.poll_id == pollId, Bet.user_id == currentUser.id)
+        .first()
+    )
+    hasVoted = myVote is not None
+    hasBet = myBet is not None
+    isCreator = poll.creator_id == currentUser.id
+    mySelection = getMySelection(options, myVote)
 
     return PollDetailResponse(
         id=poll.id,
@@ -57,9 +74,13 @@ def readPollDetail(
         participantCount=participantCount,
         totalBetCredits=totalBetCredits,
         options=optionDetails,
-        resultsVisible=True,
-        canVote=canParticipate,
-        canBet=canParticipate,
+        resultsVisible=isEnded or hasBet,
+        canVote=isActive and not hasVoted and not isCreator,
+        canBet=isActive and hasVoted and not hasBet,
+        hasVoted=hasVoted,
+        hasBet=hasBet,
+        isCreator=isCreator,
+        mySelection=mySelection,
         winnerOptionId=winnerOptionId,
         isDraw=isDraw,
     )
@@ -107,6 +128,17 @@ def calculateVoteRatio(voteCount: int, totalVotes: int) -> float:
         return 0.0
 
     return round((voteCount / totalVotes) * 100, 2)
+
+
+def getMySelection(options: list[PollOption], myVote: Vote | None) -> str | None:
+    if myVote is None:
+        return None
+
+    if myVote.option_id == options[0].id:
+        return "A"
+    if myVote.option_id == options[1].id:
+        return "B"
+    return None
 
 
 def getPollResult(
