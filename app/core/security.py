@@ -23,3 +23,25 @@ def createAccessToken(subject: Union[str, Any], expiresDelta: timedelta = None) 
     toEncode = {"exp": expire, "sub": str(subject)}
     encodedJwt = jwt.encode(toEncode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encodedJwt
+
+def createRefreshToken(subject: Union[str, Any], expiresDelta: timedelta = None) -> str:
+    if expiresDelta:
+        expire = datetime.utcnow() + expiresDelta
+    else:
+        expire = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+    toEncode = {
+        "exp": expire,
+        "sub": str(subject),
+        "type": "refresh"
+    }
+
+    encodedJwt = jwt.encode(toEncode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encodedJwt
+
+def decodeToken(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        return payload
+    except JWTError:
+        return None

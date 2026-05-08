@@ -1,10 +1,21 @@
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.api.deps import getDb, getCurrentUser
-from app.schemas.user import UserCreate, UserResponse, EmailCheckRequest, NicknameCheckRequest, SignInRequest, TokenResponse
+from app.schemas.user import (
+    UserCreate,
+    UserResponse,
+    EmailCheckRequest,
+    NicknameCheckRequest,
+    SignInRequest,
+    TokenResponse,
+    TokenReissueRequest,
+    AccessTokenResponse
+)
 from app.crud import user as userCrud
-from app.core.security import verifyPassword, createAccessToken
+from app.core.config import settings
+from app.core.security import verifyPassword, createAccessToken, createRefreshToken, decodeToken
 from app.models.user import User
 
 router = APIRouter()
@@ -63,10 +74,71 @@ def signIn(request: SignInRequest, db: Session = Depends(getDb)):
             detail="이메일 또는 비밀번호가 올바르지 않습니다."
         )
     
-    token = createAccessToken(subject=user.id)
-    
+    accessToken = createAccessToken(subject=user.id)
+    refreshToken = createRefreshToken(subject=user.id)
+    refreshTokenExpiresAt = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+    userCrud.upsertRefreshToken(
+        db=db,
+        userId=user.id,
+        refreshToken=refreshToken,
+        expiresAt=refreshTokenExpiresAt
+    )
+
     return {
-        "accessToken": token,
+        "accessToken": accessToken,
+        "refreshToken": refreshToken,
+        "tokenType": "bearer"
+    }
+
+@router.post("/reissue", response_model=AccessTokenResponse, status_code=status.HTTP_200_OK)
+def reissueAccessToken(request: TokenReissueRequest, db: Session = Depends(getDb)):
+    payload = decodeToken(request.refreshToken)
+
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유효하지 않은 refresh token입니다."
+        )
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="refresh token이 아닙니다."
+        )
+
+    userId = payload.get("sub")
+
+    if userId is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="토큰에서 사용자 정보를 확인할 수 없습니다."
+        )
+
+    authToken = userCrud.getAuthTokenByUserId(db, userId=int(userId))
+
+    if authToken is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="저장된 refresh token이 없습니다."
+        )
+
+    if authToken.refresh_token != request.refreshToken:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="refresh token이 일치하지 않습니다."
+        )
+
+    if authToken.expires_at.replace(tzinfo=None) < datetime.utcnow():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="refresh token이 만료되었습니다."
+        )
+
+    accessToken = createAccessToken(subject=userId)
+
+    return {
+        "accessToken": accessToken,
         "tokenType": "bearer"
     }
 
