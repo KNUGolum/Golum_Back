@@ -117,9 +117,26 @@ docker-compose up --build -d
 
 ### Step 3. API Docs Check
 서버가 정상적으로 구동되었다면 브라우저를 열고 아래 주소로 접속합니다.
-- **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs) (로컬 포트 매핑에 따라 다를 수 있습니다)
+- **Swagger UI:** [http://localhost:8002/docs](http://localhost:8002/docs) (Docker Compose 기준)
 - 이곳에서 API 명세서를 확인하고 직접 테스트(Try it out)해 볼 수 있습니다.
 
-### Step 4. Branch & PR Workflow
+### Step 4. Seed Data
+로컬 테스트 데이터가 필요하면 아래 명령을 실행합니다.
+
+```bash
+docker compose exec -T db psql -U golum_user -d golum_db < seed.sql
+```
+
+`seed.sql`은 기존 DB 데이터를 비우고 테스트 데이터를 다시 생성합니다. 실행 후 기존 로그인 토큰은 무효화되므로 프론트에서 다시 로그인해야 합니다.
+
+```text
+demo@example.com  / Demo1234!
+alice@example.com / Alice1234!
+bob@example.com   / Bob1234!
+chris@example.com / Chris1234!
+dana@example.com  / Dana1234!
+```
+
+### Step 5. Branch & PR Workflow
 - 새로운 기능 개발 시 `main` 브랜치에서 새로운 `feature/기능명` 브랜치를 파서 작업합니다.
 - 작업 완료 후 Github에 Push 하고, 코드 리뷰를 요청하여 승인(Approve) 후 머지하는 흐름으로 진행합니다.
