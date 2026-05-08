@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Union, Any
 from jose import jwt
 from passlib.context import CryptContext
-from app.core.config import Settings
+from app.core.config import settings
 
 # bcrypt 해싱 알고리즘 설정
 pwdContext = CryptContext(schemes=["bcrypt"], deprecated="auto")

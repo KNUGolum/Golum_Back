@@ -19,3 +19,12 @@ class UserResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class SignInRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class TokenResponse(BaseModel):
+    accessToken: str
+    tokenType: str
