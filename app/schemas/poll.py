@@ -20,9 +20,15 @@ class PollListItem(BaseModel):
     optionB: str
     status: str
     totalVotes: int
-    # creatorId: int
+    creatorId: int | None = None
     endTime: datetime
     createdAt: datetime
+    hasVoted: bool = False
+    hasBet: bool = False
+    isCreator: bool = False
+    resultsVisible: bool = False
+    canVote: bool = False
+    canBet: bool = False
 
 class PollListResponse(BaseModel):
     totalCount: int

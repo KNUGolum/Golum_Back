@@ -57,7 +57,9 @@ async def getPollList(
     sort: str = Query("latest", description="정렬 기준 (latest, popular)"),
     page: int = Query(1, ge=1, description="조회할 페이지 번호"),
     limit: int = Query(10, ge=1, le=50, description="한 페이지당 가져올 투표 개수"),
-    db: Session = Depends(getDb)
+    mine: bool = Query(False, description="현재 사용자가 참여한 투표만 조회"),
+    db: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser)
 ):
     try:
         # 1. CRUD 호출하여 데이터 가져오기
@@ -66,7 +68,9 @@ async def getPollList(
             status=pollStatus,
             sort=sort,
             page=page,
-            limit=limit
+            limit=limit,
+            userId=currentUser.id,
+            mine=mine
         )
         
         # 2. Pydantic 응답 스키마에 맞춰 반환
