@@ -33,6 +33,10 @@ class PollDetailResponse(BaseModel):
     resultsVisible: bool
     canVote: bool
     canBet: bool
+    hasVoted: bool = False
+    hasBet: bool = False
+    isCreator: bool = False
+    mySelection: str | None = None
     winnerOptionId: int | None = None
     isDraw: bool = False
 

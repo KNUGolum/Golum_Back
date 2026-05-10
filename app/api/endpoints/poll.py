@@ -4,15 +4,17 @@ from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
 
 from app.schemas.poll import PollCreateRequest, PollCreateResponse, PollListResponse
-from app.api.deps import getDb
+from app.api.deps import getCurrentUser, getDb
 from app.crud import poll as crudPoll
+from app.models.user import User
 
 router = APIRouter()
 
 @router.post("", response_model=PollCreateResponse, status_code=status.HTTP_201_CREATED)
 async def createPoll(
     pollData: PollCreateRequest,
-    db: Session = Depends(getDb)
+    db: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser)
 ):
     try:
         currentTime = datetime.now()
@@ -25,13 +27,13 @@ async def createPoll(
             db=db, 
             pollData=pollData, 
             endTime=endTime, 
-            # creatorId=currentUserId
+            creatorId=currentUser.id
         )
         
         return PollCreateResponse(
             message="투표 게시물이 성공적으로 생성되었습니다.",
             pollId=createdPoll.id,
-            # creatorId=createdPoll.creator_id,
+            creatorId=createdPoll.creator_id,
             endTime=createdPoll.end_time
         )
         
@@ -55,7 +57,9 @@ async def getPollList(
     sort: str = Query("latest", description="정렬 기준 (latest, popular)"),
     page: int = Query(1, ge=1, description="조회할 페이지 번호"),
     limit: int = Query(10, ge=1, le=50, description="한 페이지당 가져올 투표 개수"),
-    db: Session = Depends(getDb)
+    mine: bool = Query(False, description="현재 사용자가 참여한 투표만 조회"),
+    db: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser)
 ):
     try:
         # 1. CRUD 호출하여 데이터 가져오기
@@ -64,7 +68,9 @@ async def getPollList(
             status=pollStatus,
             sort=sort,
             page=page,
-            limit=limit
+            limit=limit,
+            userId=currentUser.id,
+            mine=mine
         )
         
         # 2. Pydantic 응답 스키마에 맞춰 반환

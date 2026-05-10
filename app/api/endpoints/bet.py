@@ -32,6 +32,30 @@ async def createBetParticipation(
                 detail="투표에 참여한 유저만 배팅할 수 있습니다."
             )
 
+        if result == "POLL_CLOSED":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="종료된 투표에는 배팅할 수 없습니다."
+            )
+
+        if result == "INVALID_AMOUNT":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="배팅 금액은 0 이상이어야 합니다."
+            )
+
+        if result == "ALREADY_BET":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="이미 배팅에 참여한 투표입니다."
+            )
+
+        if result == "VOTE_OPTION_MISMATCH":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="투표한 선택지에만 배팅할 수 있습니다."
+            )
+
         if result == "INSUFFICIENT_CREDIT":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -44,8 +68,22 @@ async def createBetParticipation(
                 detail="사용자 정보를 찾을 수 없습니다."
             )
 
+        if result == "POLL_NOT_FOUND":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="투표 정보를 찾을 수 없습니다."
+            )
+
+        if result == "INVALID_POLL_OPTIONS":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Poll requires exactly two options."
+            )
+
+        message = "배팅이 완료되었습니다." if bet.amount == 0 else "배팅 참여 보상으로 100 크레딧이 지급되었습니다."
+
         return BetActionResponse(
-            message="배팅 참여 보상으로 100 크레딧이 지급되었습니다.",
+            message=message,
             betDetails=BetResponse(
             id=bet.id,
             userId=bet.user_id,      
