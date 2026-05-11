@@ -1,7 +1,6 @@
-from datetime import datetime
-
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from app.core.time import now_kst_naive
 from app.models.bet import Bet, Vote
 from app.models.user import User
 from app.models.poll import Poll, PollOption
@@ -22,7 +21,7 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
         if not poll:
             return None, "POLL_NOT_FOUND"
 
-        isPollEnded = poll.end_time and poll.end_time <= datetime.now()
+        isPollEnded = poll.end_time and poll.end_time <= now_kst_naive()
         if poll.status != POLL_STATUS_ONGOING or isPollEnded:
             return None, "POLL_CLOSED"
         

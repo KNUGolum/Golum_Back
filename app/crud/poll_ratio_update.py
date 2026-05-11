@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
-from datetime import datetime
 
+from app.core.time import now_kst_naive
 from app.models.poll import Poll, PollOption, PollStat
 from app.models.bet import Vote
 
@@ -46,14 +46,14 @@ def updatePollRatio(db: Session, pollId: int):
                 total_votes=totalVotes,
                 option1_ratio=option1Ratio,
                 option2_ratio=option2Ratio,
-                updated_at=datetime.now()
+                updated_at=now_kst_naive()
             )
             db.add(pollStat)
         else:
             pollStat.total_votes = totalVotes # type: ignore
             pollStat.option1_ratio = option1Ratio # type: ignore
             pollStat.option2_ratio = option2Ratio # type: ignore
-            pollStat.updated_at = datetime.now() # type: ignore
+            pollStat.updated_at = now_kst_naive() # type: ignore
 
         db.commit()
 

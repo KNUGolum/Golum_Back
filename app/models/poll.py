@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, String, DateTime, ForeignKey, Enum, Integer, Float
-from sqlalchemy.sql import func
+from app.core.time import now_kst_naive
 from app.db.base import Base
 
 class Poll(Base):
@@ -9,7 +9,7 @@ class Poll(Base):
     creator_id = Column(BigInteger, ForeignKey("users.id"))
     status = Column(Enum('ONGOING', 'ENDED', 'INVALID', name='poll_status_enum'), default='ONGOING')
     end_time = Column(DateTime)
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime, default=now_kst_naive)
 
 class PollOption(Base):
     __tablename__ = "poll_options"
@@ -24,4 +24,4 @@ class PollStat(Base):
     total_votes = Column(Integer, default=0)
     option1_ratio = Column(Float, default=0.0)
     option2_ratio = Column(Float, default=0.0)
-    updated_at = Column(DateTime, onupdate=func.now())
+    updated_at = Column(DateTime, default=now_kst_naive, onupdate=now_kst_naive)

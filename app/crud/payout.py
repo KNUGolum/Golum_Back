@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime
+from app.core.time import now_kst_naive
 from app.models.poll import Poll, PollOption
 from app.models.bet import Bet, Settlement
 from app.models.user import User
@@ -80,7 +80,7 @@ def payoutDividends(db: Session, pollId: int, multiplier: float = DEFAULT_DIVIDE
             db.add(settlement)
             
         settlement.status = 'COMPLETED'
-        settlement.completed_at = datetime.now()
+        settlement.completed_at = now_kst_naive()
 
         db.commit()
         

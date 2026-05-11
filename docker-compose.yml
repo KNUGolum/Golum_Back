@@ -8,6 +8,9 @@ services:
       POSTGRES_USER: golum_user
       POSTGRES_PASSWORD: golum_password
       POSTGRES_DB: golum_db
+      TZ: Asia/Seoul
+      PGTZ: Asia/Seoul
+    command: ["postgres", "-c", "timezone=Asia/Seoul"]
     ports:
       - "5434:5432" # 로컬 포트 5434을 사용 (기본 5432와 충돌 방지)
     volumes:
@@ -22,6 +25,8 @@ services:
       - .:/app
     env_file:
       - .env
+    environment:
+      TZ: Asia/Seoul
     depends_on:
       - db
 

@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from datetime import datetime
 
+from app.core.time import now_kst_naive
 from app.models.bet import Bet, Vote
 from app.models.poll import Poll, PollOption, PollStat
 from app.schemas.poll import PollCreateRequest
@@ -43,13 +44,18 @@ def getPolls(
     mine: bool = False
 ):
     try:
-        currentTime = datetime.now()
+        currentTime = now_kst_naive()
         
         # Poll과 PollStat 조인 (정렬 및 전체 투표수 조회를 위해 outerjoin 사용)
         query = db.query(Poll, PollStat).outerjoin(PollStat, Poll.id == PollStat.poll_id)
 
         if mine and userId is not None:
-            query = query.join(Vote, Vote.poll_id == Poll.id).filter(Vote.user_id == userId)
+            query = (
+                query
+                .join(Vote, Vote.poll_id == Poll.id)
+                .filter(Vote.user_id == userId)
+                .filter(or_(Poll.creator_id.is_(None), Poll.creator_id != userId))
+            )
         
         if status == "ongoing":
             query = query.filter(Poll.status == 'ONGOING')
@@ -73,7 +79,12 @@ def getPolls(
 
         # N+1 쿼리 성능 저하를 막기 위해, 조회된 투표들의 ID만 모아서 선택지(Option)를 한 번에 DB에서 가져옵니다.
         pollIds = [poll.id for poll, stat in pollRecords]
-        dbOptions = db.query(PollOption).filter(PollOption.poll_id.in_(pollIds)).all()
+        dbOptions = (
+            db.query(PollOption)
+            .filter(PollOption.poll_id.in_(pollIds))
+            .order_by(PollOption.poll_id, PollOption.id)
+            .all()
+        )
         userVotes = []
         userBets = []
         if userId is not None:
@@ -103,9 +114,9 @@ def getPolls(
             optionA = options[0] if len(options) > 0 else ""
             optionB = options[1] if len(options) > 1 else ""
             isEnded = poll.status != "ONGOING" or (poll.end_time is not None and poll.end_time <= currentTime)
-            hasVoted = poll.id in votedPollIds
-            hasBet = poll.id in betPollIds
             isCreator = userId is not None and poll.creator_id == userId
+            hasVoted = poll.id in votedPollIds and not isCreator
+            hasBet = poll.id in betPollIds and not isCreator
             
             pollList.append({
                 "pollId": poll.id,
