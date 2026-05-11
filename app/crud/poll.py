@@ -60,7 +60,7 @@ def getPolls(
         if status == "ongoing":
             query = query.filter(Poll.status == 'ONGOING')
         elif status == "ended":
-            query = query.filter(Poll.status == 'ENDED')
+            query = query.filter(Poll.status.in_(["ENDED", "INVALID"]))
             
         if sort == "popular":
             query = query.order_by(desc(PollStat.total_votes))
