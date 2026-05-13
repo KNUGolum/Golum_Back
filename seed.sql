@@ -39,7 +39,7 @@ INSERT INTO polls (id, title, creator_id, status, end_time, created_at)
 VALUES
   (2001, '점심 메뉴 뭐 먹을까?', 1002, 'ONGOING', now() + interval '21 hours', now() - interval '3 hours'),
   (2002, '이번 발표 결과는?', 1003, 'ENDED', now() - interval '2 hours', now() - interval '1 day'),
-  (2003, '아이폰 vs 갤럭시, 당신의 선택은?', 1001, 'ONGOING', now() + interval '6 hours', now() - interval '2 hours'),
+  (2003, '아이폰 vs 갤럭시, 당신의 선택은?', 1001, 'ONGOING', now() + interval '4 minutes', now() - interval '2 hours'),
   (2004, '여름 vs 겨울, 최애 계절은?', 1002, 'ONGOING', now() + interval '18 hours', now() - interval '8 hours'),
   (2005, '퇴근 후 운동 vs 휴식?', 1004, 'ONGOING', now() + interval '10 hours', now() - interval '4 hours'),
   (2006, '민트초코는 호인가 불호인가?', 1005, 'ONGOING', now() + interval '2 hours', now() - interval '11 hours'),
@@ -55,8 +55,8 @@ VALUES
   (3002, 2001, '제육볶음', 58),
   (3003, 2002, '성공', 81),
   (3004, 2002, '아쉬움', 27),
-  (3005, 2003, '아이폰', 124),
-  (3006, 2003, '갤럭시', 98),
+  (3005, 2003, '아이폰', 5),
+  (3006, 2003, '갤럭시', 1),
   (3007, 2004, '여름', 33),
   (3008, 2004, '겨울', 41),
   (3009, 2005, '운동', 29),
@@ -76,7 +76,7 @@ INSERT INTO poll_stats (poll_id, total_votes, option1_ratio, option2_ratio, upda
 VALUES
   (2001, 100, 42.00, 58.00, now()),
   (2002, 108, 75.00, 25.00, now()),
-  (2003, 222, 55.86, 44.14, now()),
+  (2003, 6, 83.33, 16.67, now()),
   (2004, 74, 44.59, 55.41, now()),
   (2005, 105, 27.62, 72.38, now()),
   (2006, 101, 36.63, 63.37, now()),
