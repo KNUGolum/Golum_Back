@@ -57,7 +57,8 @@
 ## 6. User Story Map
 <br>
 
-<img width="1066" height="457" alt="스크린샷 2026-05-06 오후 3 58 14" src="https://github.com/user-attachments/assets/08a74d8e-9aaf-4fe7-8d0e-d1ba8df2e48d" />
+<img width="1094" height="455" alt="스크린샷 2026-05-26 오후 7 42 23" src="https://github.com/user-attachments/assets/0bad0311-bacc-475a-8a45-6bf90779dfd0" />
+
 
 <br>
 
