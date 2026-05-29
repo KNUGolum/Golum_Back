@@ -47,3 +47,51 @@ def purchaseTitle(db: Session, userId: int, titleId: int):
     except SQLAlchemyError as databaseError:
         db.rollback()
         raise databaseError
+
+def equipTitle(db: Session, userId: int, titleId: int):
+    try:
+        user = db.query(User).filter(User.id == userId).first()
+
+        if not user:
+            return None, "USER_NOT_FOUND"
+
+        userTitle = db.query(UserTitle).filter(
+            UserTitle.user_id == userId,
+            UserTitle.title_id == titleId
+        ).first()
+
+        if not userTitle:
+            return None, "TITLE_NOT_OWNED"
+
+        if user.equipped_title_id == titleId:
+            return None, "ALREADY_EQUIPPED"
+
+        user.equipped_title_id = titleId
+
+        db.commit()
+        db.refresh(user)
+
+        return user, "SUCCESS"
+
+    except SQLAlchemyError as databaseError:
+        db.rollback()
+        raise databaseError
+
+
+def unequipTitle(db: Session, userId: int):
+    try:
+        user = db.query(User).filter(User.id == userId).first()
+
+        if not user:
+            return None, "USER_NOT_FOUND"
+
+        user.equipped_title_id = None
+
+        db.commit()
+        db.refresh(user)
+
+        return user, "SUCCESS"
+
+    except SQLAlchemyError as databaseError:
+        db.rollback()
+        raise databaseError
