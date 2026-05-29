@@ -51,3 +51,11 @@ def upsertRefreshToken(db: Session, userId: int, refreshToken: str, expiresAt):
 
 def getAuthTokenByUserId(db: Session, userId: int):
     return db.query(AuthToken).filter(AuthToken.user_id == userId).first()
+
+def updateNickname(db: Session, userId: int, newNickname: str):
+    user = db.query(User).filter(User.id == userId).first()
+    if user:
+        user.nickname = newNickname
+        db.commit()
+        db.refresh(user)
+    return user

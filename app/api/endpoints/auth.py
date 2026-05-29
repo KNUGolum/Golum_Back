@@ -11,7 +11,8 @@ from app.schemas.user import (
     SignInRequest,
     TokenResponse,
     TokenReissueRequest,
-    AccessTokenResponse
+    AccessTokenResponse,
+    NicknameUpdateRequest
 )
 from app.crud import user as userCrud
 from app.core.config import settings
@@ -157,3 +158,25 @@ def swaggerLogin(formData: OAuth2PasswordRequestForm = Depends(), db: Session = 
 @router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
 def getMyInfo(currentUser: User = Depends(getCurrentUser)):
     return currentUser
+
+@router.put("/nickname", response_model=UserResponse, status_code=status.HTTP_200_OK)
+def changeNickname(
+    request: NicknameUpdateRequest,
+    db: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser)
+):
+    existingUser = userCrud.getUserByNickname(db, nickname=request.nickname)
+    if existingUser:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 존재하는 닉네임입니다."
+        )
+    
+    updatedUser = userCrud.updateNickname(db=db, userId=currentUser.id, newNickname=request.nickname)
+    if not updatedUser:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="사용자 정보를 찾을 수 없습니다."
+        )
+        
+    return updatedUser
