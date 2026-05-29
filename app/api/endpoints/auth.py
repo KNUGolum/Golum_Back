@@ -11,7 +11,8 @@ from app.schemas.user import (
     SignInRequest,
     TokenResponse,
     TokenReissueRequest,
-    AccessTokenResponse
+    AccessTokenResponse,
+    CreditResponse
 )
 from app.crud import user as userCrud
 from app.core.config import settings
@@ -157,3 +158,20 @@ def swaggerLogin(formData: OAuth2PasswordRequestForm = Depends(), db: Session = 
 @router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
 def getMyInfo(currentUser: User = Depends(getCurrentUser)):
     return currentUser
+
+@router.get("/credit", response_model=CreditResponse)
+async def getCurrentUserCredit(
+    db: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser)
+):
+    currentCredit = user.getUserCredit(db, currentUser.id)
+
+    if currentCredit is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="존재하지 않는 사용자입니다."
+        )
+
+    return CreditResponse(
+        credit=currentCredit
+    )
