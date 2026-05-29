@@ -18,7 +18,16 @@ class PurchaseTitleResponse(BaseModel):
 class EquipTitleRequest(BaseModel):
     titleId: Optional[int] = None
 
-
 class EquipTitleResponse(BaseModel):
     message: str
     equippedTitleId: Optional[int] = None
+
+class InventoryTitle(BaseModel):
+    titleId: int
+    name: str
+    grade: str
+    isEquipped: bool
+
+class InventoryTitleListResponse(BaseModel):
+    message: str
+    titles: List[InventoryTitle]
