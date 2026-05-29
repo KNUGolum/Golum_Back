@@ -60,3 +60,6 @@ def createVote(db: Session, pollId: int, userId: int, selection: str):
     except SQLAlchemyError as databaseError:
         db.rollback()
         raise databaseError
+
+def getVoteHistoryByUserId(db: Session, userId: int):
+    return db.query(Vote).filter(Vote.user_id == userId).order_by(Vote.created_at.desc()).all()

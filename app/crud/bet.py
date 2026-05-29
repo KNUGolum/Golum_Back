@@ -77,3 +77,6 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
     except SQLAlchemyError as databaseError:
         db.rollback()
         raise databaseError
+
+def getBetHistoryByUserId(db: Session, userId: int):
+    return db.query(Bet).filter(Bet.user_id == userId).order_by(Bet.created_at.desc()).all()

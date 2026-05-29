@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from typing import List
 
 from app.api.deps import getDb, getCurrentUser
 from app.schemas.bet import BetCreate, BetActionResponse, BetResponse
@@ -107,3 +108,19 @@ async def createBetParticipation(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"서버 내부 오류가 발생했습니다: {str(unexpectedError)}"
         )
+
+@router.get("/history", response_model=List[BetResponse], status_code=status.HTTP_200_OK)
+def getMyBetHistory(db: Session = Depends(getDb), currentUser: User = Depends(getCurrentUser)):
+    bets = crudBet.getBetHistoryByUserId(db=db, userId=currentUser.id)
+    return [
+        BetResponse(
+            id=b.id,
+            userId=b.user_id,
+            pollId=b.poll_id,
+            optionId=b.option_id,
+            amount=b.amount,
+            result=b.result,
+            rewardAmount=b.reward_amount,
+            createdAt=b.created_at
+        ) for b in bets
+    ]

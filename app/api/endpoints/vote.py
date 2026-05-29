@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import List
 
 from app.api.deps import getCurrentUser, getDb
 
-from app.schemas.vote import VoteRequest, VoteResponse, VoteDetails
-from app.crud.vote import createVote
+from app.schemas.vote import VoteRequest, VoteResponse, VoteDetails, VoteHistoryItem
+from app.crud.vote import createVote, getVoteHistoryByUserId
 from app.models.user import User
 
 router = APIRouter()
@@ -52,3 +53,15 @@ async def submitVote(
             selectedOption=voteData.selection
         )
     )
+
+@router.get("/history", response_model=List[VoteHistoryItem], status_code=status.HTTP_200_OK)
+def getMyVoteHistory(db: Session = Depends(getDb), currentUser: User = Depends(getCurrentUser)):
+    votes = getVoteHistoryByUserId(db=db, userId=currentUser.id)
+    return [
+        VoteHistoryItem(
+            id=v.id,
+            pollId=v.poll_id,
+            optionId=v.option_id,
+            createdAt=v.created_at
+        ) for v in votes
+    ]
