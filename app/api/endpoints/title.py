@@ -5,6 +5,7 @@ from app.api.deps import getDb, getCurrentUser
 from app.crud import title
 from app.models.user import User
 from app.schemas.title import ShopTitle, TitleShopListResponse, PurchaseTitleResponse, EquipTitleRequest, EquipTitleResponse
+from app.schemas.title import InventoryTitle, InventoryTitleListResponse
 
 router = APIRouter()
 
@@ -106,4 +107,29 @@ async def updateEquippedTitle(
     return EquipTitleResponse(
         message="칭호 장착이 완료되었습니다.",
         equippedTitleId=user.equipped_title_id
+    )
+
+@router.get("/inventory", response_model=InventoryTitleListResponse)
+async def getTitleInventory(
+    db: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser)
+):
+    inventoryTitles = title.getUserInventoryTitles(db, currentUser.id)
+
+    if inventoryTitles:
+        message = "칭호 목록 조회가 완료되었습니다."
+    else:
+        message = "보유한 칭호가 없습니다"
+
+    return InventoryTitleListResponse(
+        message=message,
+        titles=[
+            InventoryTitle(
+                titleId=inventoryTitle.id,
+                name=inventoryTitle.name,
+                grade=inventoryTitle.grade,
+                isEquipped=inventoryTitle.id == currentUser.equipped_title_id
+            )
+            for userTitle, inventoryTitle in inventoryTitles
+        ]
     )
