@@ -49,6 +49,15 @@ def upsertRefreshToken(db: Session, userId: int, refreshToken: str, expiresAt):
 
     return authToken
 
+def deleteRefreshToken(db: Session, userId: int):
+    authToken = db.query(AuthToken).filter(AuthToken.user_id == userId).first()
+    
+    if authToken:
+        db.delete(authToken)
+        db.commit()
+        
+    return authToken
+
 def getAuthTokenByUserId(db: Session, userId: int):
     return db.query(AuthToken).filter(AuthToken.user_id == userId).first()
 
