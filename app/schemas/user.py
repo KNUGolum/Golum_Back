@@ -39,3 +39,6 @@ class TokenReissueRequest(BaseModel):
 class AccessTokenResponse(BaseModel):
     accessToken: str
     tokenType: str
+
+class CreditResponse(BaseModel):
+    credit: int
