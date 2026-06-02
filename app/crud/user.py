@@ -49,6 +49,15 @@ def upsertRefreshToken(db: Session, userId: int, refreshToken: str, expiresAt):
 
     return authToken
 
+def deleteRefreshToken(db: Session, userId: int):
+    authToken = db.query(AuthToken).filter(AuthToken.user_id == userId).first()
+    
+    if authToken:
+        db.delete(authToken)
+        db.commit()
+        
+    return authToken
+
 def getAuthTokenByUserId(db: Session, userId: int):
     return db.query(AuthToken).filter(AuthToken.user_id == userId).first()
 
@@ -59,3 +68,10 @@ def getUserCredit(db: Session, userId: int):
         return user.credit
     else:
         return None
+def updateNickname(db: Session, userId: int, newNickname: str):
+    user = db.query(User).filter(User.id == userId).first()
+    if user:
+        user.nickname = newNickname
+        db.commit()
+        db.refresh(user)
+    return user

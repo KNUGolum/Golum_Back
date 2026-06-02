@@ -4,6 +4,7 @@ from sqlalchemy import desc, or_
 from datetime import datetime
 
 from app.core.time import now_kst_naive
+from app.crud import poll_detail as pollDetailCrud
 from app.models.bet import Bet, Vote
 from app.models.poll import Poll, PollOption, PollStat
 from app.schemas.poll import PollCreateRequest
@@ -104,8 +105,8 @@ def getPolls(
                 optionMap[option.poll_id] = []
             optionMap[option.poll_id].append(option.option_text)
 
-        votedPollIds = {vote.poll_id for vote in userVotes}
-        betPollIds = {bet.poll_id for bet in userBets}
+        voteMap = {vote.poll_id: vote for vote in userVotes}
+        betMap = {bet.poll_id: bet for bet in userBets}
 
         # 프론트엔드 응답 규격(PollListItem)에 맞게 최종 데이터 조립
         pollList = []
@@ -113,10 +114,13 @@ def getPolls(
             options = optionMap.get(poll.id, [])
             optionA = options[0] if len(options) > 0 else ""
             optionB = options[1] if len(options) > 1 else ""
-            isEnded = poll.status != "ONGOING" or (poll.end_time is not None and poll.end_time <= currentTime)
-            isCreator = userId is not None and poll.creator_id == userId
-            hasVoted = poll.id in votedPollIds and not isCreator
-            hasBet = poll.id in betPollIds and not isCreator
+            actionState = pollDetailCrud.getPollActionState(
+                poll=poll,
+                userId=userId,
+                myVote=voteMap.get(poll.id),
+                myBet=betMap.get(poll.id),
+                now=currentTime,
+            )
             
             pollList.append({
                 "pollId": poll.id,
@@ -128,12 +132,12 @@ def getPolls(
                 "creatorId": poll.creator_id,
                 "endTime": poll.end_time,
                 "createdAt": poll.created_at,
-                "hasVoted": hasVoted,
-                "hasBet": hasBet,
-                "isCreator": isCreator,
-                "resultsVisible": isEnded or hasBet,
-                "canVote": not isEnded and not hasVoted and not isCreator,
-                "canBet": not isEnded and hasVoted and not hasBet
+                "hasVoted": actionState["hasVoted"],
+                "hasBet": actionState["hasBet"],
+                "isCreator": actionState["isCreator"],
+                "resultsVisible": actionState["resultsVisible"],
+                "canVote": actionState["canVote"],
+                "canBet": actionState["canBet"]
             })
 
         return totalCount, pollList

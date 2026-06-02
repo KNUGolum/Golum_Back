@@ -17,7 +17,8 @@ TRUNCATE TABLE
   poll_options,
   polls,
   auth_tokens,
-  users
+  users,
+  titles
 RESTART IDENTITY CASCADE;
 
 -- Test accounts
@@ -120,6 +121,14 @@ VALUES
   (6002, 2007, 'COMPLETED', now() - interval '4 hours', now() - interval '3 hours'),
   (6003, 2009, 'PENDING', now() - interval '20 hours', null);
 
+-- Title shop items.
+INSERT INTO titles (id, name, grade, price)
+VALUES
+  (1, '초보', 'COMMON', 300),
+  (2, '승부사', 'RARE', 800),
+  (3, '타짜', 'EPIC', 1500),
+  (4, '골룸', 'LEGENDARY', 3000);
+
 -- Keep auto-increment sequences ahead of fixed seed IDs.
 SELECT setval(pg_get_serial_sequence('users', 'id'), COALESCE((SELECT MAX(id) FROM users), 1), true);
 SELECT setval(pg_get_serial_sequence('polls', 'id'), COALESCE((SELECT MAX(id) FROM polls), 1), true);
@@ -127,5 +136,6 @@ SELECT setval(pg_get_serial_sequence('poll_options', 'id'), COALESCE((SELECT MAX
 SELECT setval(pg_get_serial_sequence('votes', 'id'), COALESCE((SELECT MAX(id) FROM votes), 1), true);
 SELECT setval(pg_get_serial_sequence('bets', 'id'), COALESCE((SELECT MAX(id) FROM bets), 1), true);
 SELECT setval(pg_get_serial_sequence('settlements', 'id'), COALESCE((SELECT MAX(id) FROM settlements), 1), true);
+SELECT setval(pg_get_serial_sequence('titles', 'id'), COALESCE((SELECT MAX(id) FROM titles), 1), true);
 
 COMMIT;

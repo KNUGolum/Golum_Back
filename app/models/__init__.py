@@ -4,3 +4,4 @@ from app.db.base import Base  # Base를 먼저 가져와야 함
 from app.models.user import User
 from app.models.poll import Poll
 from app.models.bet import Bet
+from app.models.title import Title
