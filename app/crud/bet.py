@@ -1,16 +1,17 @@
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from app.core.time import now_kst_naive
+from sqlalchemy.orm import Session
+
+from app.crud import poll_detail as pollDetailCrud
 from app.models.bet import Bet, Vote
-from app.models.user import User
 from app.models.poll import Poll, PollOption
+from app.models.user import User
 
-POLL_STATUS_ONGOING = "ONGOING"
+BET_PARTICIPATION_REWARD_CREDIT = 100
 
-def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int):
+
+def createBet(db: Session, userId: int, pollId: int, optionId: str, amount: int):
     try:
         user = db.query(User).filter(User.id == userId).first()
-        
         if not user:
             return None, "USER_NOT_FOUND"
 
@@ -21,37 +22,38 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
         if not poll:
             return None, "POLL_NOT_FOUND"
 
-        isPollEnded = poll.end_time and poll.end_time <= now_kst_naive()
-        if poll.status != POLL_STATUS_ONGOING or isPollEnded:
+        if not pollDetailCrud.isPollActive(poll):
             return None, "POLL_CLOSED"
-        
-        # PR 피드백 반영 - A/B 선택
-        options = db.query(PollOption).filter(PollOption.poll_id == pollId).order_by(PollOption.id).all()
-        if len(options) != 2:
-            return None, "INVALID_POLL_OPTIONS"
-        
-        realOptionId = options[0].id if optionId == "A" else options[1].id
-    
-        # PR 피드백 반영 - 투표 참여 여부 확인
-        vote = db.query(Vote).filter(
-            Vote.user_id == userId, 
-            Vote.poll_id == pollId
-        ).first()
 
+        options = (
+            db.query(PollOption)
+            .filter(PollOption.poll_id == pollId)
+            .order_by(PollOption.id)
+            .all()
+        )
+        selectedOption = pollDetailCrud.resolveOptionBySelection(options, optionId)
+        if selectedOption is None:
+            return None, "INVALID_POLL_OPTIONS"
+
+        vote = (
+            db.query(Vote)
+            .filter(Vote.user_id == userId, Vote.poll_id == pollId)
+            .first()
+        )
         if not vote:
             return None, "NOT_VOTED"
 
-        if vote.option_id != realOptionId:
+        if vote.option_id != selectedOption.id:
             return None, "VOTE_OPTION_MISMATCH"
 
-        alreadyBet = db.query(Bet).filter(
-            Bet.user_id == userId,
-            Bet.poll_id == pollId
-        ).first()
-
+        alreadyBet = (
+            db.query(Bet)
+            .filter(Bet.user_id == userId, Bet.poll_id == pollId)
+            .first()
+        )
         if alreadyBet:
             return None, "ALREADY_BET"
-        
+
         if user.credit < amount:
             return None, "INSUFFICIENT_CREDIT"
 
@@ -60,20 +62,22 @@ def createBet(db: Session, userId: int, pollId: int, optionId: int, amount: int)
         newBet = Bet(
             user_id=userId,
             poll_id=pollId,
-            option_id=realOptionId,
-            amount=amount
+            option_id=selectedOption.id,
+            amount=amount,
         )
         db.add(newBet)
 
-        # 배팅 참여 크레딧 지급 (임시로 100포인트 설정함)
         if amount > 0:
-            user.credit += 100
+            user.credit += BET_PARTICIPATION_REWARD_CREDIT
 
         db.commit()
         db.refresh(newBet)
-        
+
         return newBet, "SUCCESS"
 
     except SQLAlchemyError as databaseError:
         db.rollback()
         raise databaseError
+
+def getBetHistoryByUserId(db: Session, userId: int):
+    return db.query(Bet).filter(Bet.user_id == userId).order_by(Bet.created_at.desc()).all()

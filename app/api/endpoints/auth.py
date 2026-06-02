@@ -11,7 +11,8 @@ from app.schemas.user import (
     SignInRequest,
     TokenResponse,
     TokenReissueRequest,
-    AccessTokenResponse
+    AccessTokenResponse,
+    NicknameUpdateRequest
 )
 from app.crud import user as userCrud
 from app.core.config import settings
@@ -150,10 +151,49 @@ def swaggerLogin(formData: OAuth2PasswordRequestForm = Depends(), db: Session = 
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="이메일 또는 비밀번호가 올바르지 않습니다."
         )
-    
-    token = createAccessToken(subject=user.id)
-    return {"access_token": token, "token_type": "bearer"}
+    accessToken = createAccessToken(subject=user.id)
+    refreshToken = createRefreshToken(subject=user.id)
+    refreshTokenExpiresAt = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    userCrud.upsertRefreshToken(
+        db=db,
+        userId=user.id,
+        refreshToken=refreshToken,
+        expiresAt=refreshTokenExpiresAt
+    )
+    return {"access_token": accessToken, "token_type": "bearer"}
 
 @router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
 def getMyInfo(currentUser: User = Depends(getCurrentUser)):
     return currentUser
+
+@router.put("/nickname", response_model=UserResponse, status_code=status.HTTP_200_OK)
+def changeNickname(
+    request: NicknameUpdateRequest,
+    db: Session = Depends(getDb),
+    currentUser: User = Depends(getCurrentUser)
+):
+    existingUser = userCrud.getUserByNickname(db, nickname=request.nickname)
+    if existingUser:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 존재하는 닉네임입니다."
+        )
+    
+    updatedUser = userCrud.updateNickname(db=db, userId=currentUser.id, newNickname=request.nickname)
+    if not updatedUser:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="사용자 정보를 찾을 수 없습니다."
+        )
+        
+    return updatedUser
+@router.post("/logout", status_code=status.HTTP_200_OK)
+def logOut(db: Session = Depends(getDb), currentUser: User = Depends(getCurrentUser)):
+    authToken = userCrud.deleteRefreshToken(db=db, userId=currentUser.id)
+    if not authToken:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="이미 로그아웃되었거나 유효한 인증 토큰을 찾을 수 없습니다."
+        )
+        
+    return {"message": "성공적으로 로그아웃되었습니다."}
