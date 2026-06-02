@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from typing import Union, Any
-from jose import jwt
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 from app.core.config import settings
 
