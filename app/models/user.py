@@ -9,6 +9,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     nickname = Column(String(50), unique=True, nullable=False)
     credit = Column(Integer, default=0)
+    equipped_title_id = Column(BigInteger, ForeignKey("titles.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

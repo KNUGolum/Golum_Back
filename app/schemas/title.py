@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class ShopTitle(BaseModel):
     titleId: int
@@ -14,3 +14,11 @@ class TitleShopListResponse(BaseModel):
 class PurchaseTitleResponse(BaseModel):
     message: str
     currentCredit: int
+
+class EquipTitleRequest(BaseModel):
+    titleId: Optional[int] = None
+
+
+class EquipTitleResponse(BaseModel):
+    message: str
+    equippedTitleId: Optional[int] = None
