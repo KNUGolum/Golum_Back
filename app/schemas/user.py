@@ -6,6 +6,9 @@ class EmailCheckRequest(BaseModel):
 class NicknameCheckRequest(BaseModel):
     nickname: str
 
+class NicknameUpdateRequest(BaseModel):
+    nickname: str
+    
 class UserCreate(BaseModel):
     email: EmailStr
     nickname: str
