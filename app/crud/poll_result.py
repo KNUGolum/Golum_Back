@@ -1,55 +1,45 @@
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 from app.core.time import now_kst_naive
-from app.models.poll import Poll, PollOption
-from app.models.bet import Vote
+from app.crud import poll_detail as pollDetailCrud
+from app.models.poll import Poll
+
 
 def evaluatePollResult(db: Session, pollId: int):
     try:
         poll = db.query(Poll).filter(Poll.id == pollId).first()
         if not poll:
             return None, "POLL_NOT_FOUND"
-        
-        if poll.status in ["ENDED", "INVALID"]: 
+
+        if poll.status in [
+            pollDetailCrud.POLL_STATUS_ENDED,
+            pollDetailCrud.POLL_STATUS_INVALID,
+        ]:
             return None, "ALREADY_EVALUATED"
-        
-        # PR 피드백 반영 - 종료 후 판정
-        currentTime = now_kst_naive()
-        if currentTime < poll.end_time:
+
+        if poll.end_time is not None and now_kst_naive() < poll.end_time:
             return None, "POLL_STILL_ONGOING"
 
-        options = db.query(PollOption).filter(PollOption.poll_id == pollId).order_by(PollOption.id).all()
-        if len(options) < 2:
+        options = pollDetailCrud.getPollOptions(db, pollId)
+        if not pollDetailCrud.hasBinaryOptions(options):
             return None, "NOT_ENOUGH_OPTIONS"
-        
-        optionA, optionB = options[0], options[1]
 
-        voteCountA = db.query(func.count(Vote.id)).filter(Vote.poll_id == pollId, Vote.option_id == optionA.id).scalar() or 0
-        voteCountB = db.query(func.count(Vote.id)).filter(Vote.poll_id == pollId, Vote.option_id == optionB.id).scalar() or 0
-        totalVotes = voteCountA + voteCountB
+        resultStatus, winningOptionId, totalVoteCount = (
+            pollDetailCrud.calculatePollResultStatus(options)
+        )
 
-        resultStatus = None
-        winningOptionId = None
-
-        if totalVotes == 0:
-            resultStatus = "INVALID"
-            poll.status = "INVALID"
-        elif voteCountA == voteCountB:
-            resultStatus = "DRAW"
-            poll.status = "ENDED"
+        if resultStatus == pollDetailCrud.POLL_RESULT_INVALID:
+            poll.status = pollDetailCrud.POLL_STATUS_INVALID
         else:
-            resultStatus = "FINISHED"
-            poll.status = "ENDED"
-            winningOptionId = optionA.id if voteCountA > voteCountB else optionB.id
+            poll.status = pollDetailCrud.POLL_STATUS_ENDED
 
         db.commit()
 
         return {
             "pollResultStatus": resultStatus,
             "winningOptionId": winningOptionId,
-            "totalVoteCount": totalVotes
+            "totalVoteCount": totalVoteCount,
         }, "SUCCESS"
 
     except SQLAlchemyError as databaseError:
