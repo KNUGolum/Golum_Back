@@ -1,14 +1,34 @@
 from pydantic import BaseModel
-from typing import List
-
+from typing import List, Optional
 
 class ShopTitle(BaseModel):
     titleId: int
     name: str
     grade: str
     price: int
-
+    isOwned: bool
 
 class TitleShopListResponse(BaseModel):
     message: str
     titles: List[ShopTitle]
+
+class PurchaseTitleResponse(BaseModel):
+    message: str
+    currentCredit: int
+
+class EquipTitleRequest(BaseModel):
+    titleId: Optional[int] = None
+
+class EquipTitleResponse(BaseModel):
+    message: str
+    equippedTitleId: Optional[int] = None
+
+class InventoryTitle(BaseModel):
+    titleId: int
+    name: str
+    grade: str
+    isEquipped: bool
+
+class InventoryTitleListResponse(BaseModel):
+    message: str
+    titles: List[InventoryTitle]
