@@ -141,3 +141,7 @@ dana@example.com  / Dana1234!
 ### Step 5. Branch & PR Workflow
 - 새로운 기능 개발 시 `main` 브랜치에서 새로운 `feature/기능명` 브랜치를 파서 작업합니다.
 - 작업 완료 후 Github에 Push 하고, 코드 리뷰를 요청하여 승인(Approve) 후 머지하는 흐름으로 진행합니다.
+
+
+## 9. Test
+- [테스트 내용 및 결과](./test.md)
