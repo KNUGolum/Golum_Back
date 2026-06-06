@@ -150,34 +150,34 @@
 | UT-WB-VOTE-01 | `app/crud/vote.py::createVote` | 정상 투표 상태 변경 | 진행 중 투표, 생성자 아님, 중복 없음 | Poll, PollOption, PollStat, User 조회 Mock | pollId, userId, selection | Vote 생성, vote_count 증가, total_votes 증가, credit 증가 |
 | UT-WB-VOTE-02 | `app/crud/vote.py::createVote` | 실패 분기 | Poll 없음, 종료됨, 생성자, 이미 투표함, 선택지 없음 | 각 상황별 DB 조회 Mock | pollId, userId, selection | `INVALID_POLL`, `POLL_CLOSED`, `CREATOR_CANNOT_VOTE`, `ALREADY_VOTED` 반환 |
 | UT-WB-VOTE-03 | `app/crud/vote.py::getVoteHistoryByUserId` | 정렬 경로 | 투표 이력 있음, 없음 | Vote query 결과 Mock | userId | created_at 내림차순 목록 또는 빈 목록 반환 |
-| UT-WB-VOTE-04 | `app/crud/vote.py::createVote` | 제외 항목 | User 또는 PollStat이 없는 상태에서 Vote가 생성되는 현재 구현 동작 확인 | PollOption은 존재하고 PollStat/User 조회 결과 None | pollId, userId, selection | 데이터 무결성 기대 결과와 모순되어 유효 케이스에서 제외하고 `VOTE2-UT-05`, `VOTE2-UT-06`으로 대체 |
+| UT-WB-VOTE-04 | `app/crud/vote.py::createVote` | 제외 항목 | User 또는 PollStat이 없는 상태에서 Vote가 생성되는 현재 구현 동작 확인 | PollOption은 존재하고 PollStat/User 조회 결과 None | pollId, userId, selection | 데이터 무결성 기대 결과와 모순되어 유효 케이스에서 제외하고 `UT-WB-VOTE-10`, `UT-WB-VOTE-11`으로 대체 |
 | UT-WB-VOTE-05 | `app/api/endpoints/vote.py::submitVote`, `getMyVoteHistory` | endpoint 결과 매핑 | 투표 성공, 중복, 없는 투표, 종료, 생성자, 이력 있음/없음 | createVote와 getVoteHistoryByUserId 반환값 Mock | pollId, VoteRequest | 성공 응답 또는 결과 코드별 `HTTPException`, 이력 응답 목록 반환 |
-| VOTE2-UT-01 | `app/crud/vote.py::createVote` | Vote 생성 데이터 | 정상 투표 시 Vote 생성만 확인 | 진행 중 Poll, 선택지, User, PollStat Mock | pollId, userId, selection | Vote 객체가 add되고 poll_id, user_id, option_id가 일치 |
-| VOTE2-UT-02 | `app/crud/vote.py::createVote` | 선택지 투표수 상태 변경 | 정상 투표 시 option vote_count 증가만 확인 | vote_count가 있는 PollOption Mock | selection A | 대상 PollOption의 vote_count가 정확히 1 증가 |
-| VOTE2-UT-03 | `app/crud/vote.py::createVote` | 전체 투표수 상태 변경 | 정상 투표 시 PollStat total_votes 증가만 확인 | PollStat Mock | selection A | PollStat이 있으면 total_votes가 정확히 1 증가 |
-| VOTE2-UT-04 | `app/crud/vote.py::createVote` | 투표 보상 상태 변경 | 정상 투표 시 사용자 credit 보상만 확인 | User credit Mock | selection A | User가 있으면 credit이 100 증가 |
-| VOTE2-UT-05 | `app/crud/vote.py::createVote` | User 누락 데이터 무결성 | User가 없는 상태에서 투표 시도 | User 조회 결과 None | userId | 사용자 없는 Vote 생성이 발생하지 않아야 함 |
-| VOTE2-UT-06 | `app/crud/vote.py::createVote` | PollStat 누락 데이터 무결성 | PollStat이 없는 상태에서 투표 시도 | PollStat 조회 결과 None | pollId | 집계 불일치를 만들지 않아야 함 |
-| VOTE2-UT-07 | `app/crud/vote.py::createVote` | 중복 투표 부작용 차단 | 이미 투표한 사용자 | Vote 조회 결과 있음 | pollId, userId | `ALREADY_VOTED`, Vote/credit/count 변경 없음 |
-| VOTE2-UT-08 | `app/crud/vote.py::createVote` | 생성자 투표 부작용 차단 | 생성자가 본인 Poll에 투표 | poll.creator_id == userId | pollId, userId | `CREATOR_CANNOT_VOTE`, 변경 없음 |
-| VOTE2-UT-09 | `app/crud/vote.py::createVote` | 종료 시간 경계 | poll end_time이 현재 시각과 같음 | now 고정 | pollId | 종료된 poll로 처리되어 `POLL_CLOSED` |
-| VOTE2-UT-10 | `app/crud/vote.py::createVote` | 트랜잭션 실패 경로 | commit 실패 | db.commit이 SQLAlchemyError 발생 | 정상 투표 입력 | rollback 호출 및 예외 전파 |
+| UT-WB-VOTE-06 | `app/crud/vote.py::createVote` | Vote 생성 데이터 | 정상 투표 시 Vote 생성만 확인 | 진행 중 Poll, 선택지, User, PollStat Mock | pollId, userId, selection | Vote 객체가 add되고 poll_id, user_id, option_id가 일치 |
+| UT-WB-VOTE-07 | `app/crud/vote.py::createVote` | 선택지 투표수 상태 변경 | 정상 투표 시 option vote_count 증가만 확인 | vote_count가 있는 PollOption Mock | selection A | 대상 PollOption의 vote_count가 정확히 1 증가 |
+| UT-WB-VOTE-08 | `app/crud/vote.py::createVote` | 전체 투표수 상태 변경 | 정상 투표 시 PollStat total_votes 증가만 확인 | PollStat Mock | selection A | PollStat이 있으면 total_votes가 정확히 1 증가 |
+| UT-WB-VOTE-09 | `app/crud/vote.py::createVote` | 투표 보상 상태 변경 | 정상 투표 시 사용자 credit 보상만 확인 | User credit Mock | selection A | User가 있으면 credit이 100 증가 |
+| UT-WB-VOTE-10 | `app/crud/vote.py::createVote` | User 누락 데이터 무결성 | User가 없는 상태에서 투표 시도 | User 조회 결과 None | userId | 사용자 없는 Vote 생성이 발생하지 않아야 함 |
+| UT-WB-VOTE-11 | `app/crud/vote.py::createVote` | PollStat 누락 데이터 무결성 | PollStat이 없는 상태에서 투표 시도 | PollStat 조회 결과 None | pollId | 집계 불일치를 만들지 않아야 함 |
+| UT-WB-VOTE-12 | `app/crud/vote.py::createVote` | 중복 투표 부작용 차단 | 이미 투표한 사용자 | Vote 조회 결과 있음 | pollId, userId | `ALREADY_VOTED`, Vote/credit/count 변경 없음 |
+| UT-WB-VOTE-13 | `app/crud/vote.py::createVote` | 생성자 투표 부작용 차단 | 생성자가 본인 Poll에 투표 | poll.creator_id == userId | pollId, userId | `CREATOR_CANNOT_VOTE`, 변경 없음 |
+| UT-WB-VOTE-14 | `app/crud/vote.py::createVote` | 종료 시간 경계 | poll end_time이 현재 시각과 같음 | now 고정 | pollId | 종료된 poll로 처리되어 `POLL_CLOSED` |
+| UT-WB-VOTE-15 | `app/crud/vote.py::createVote` | 트랜잭션 실패 경로 | commit 실패 | db.commit이 SQLAlchemyError 발생 | 정상 투표 입력 | rollback 호출 및 예외 전파 |
 | UT-WB-BET-01 | `app/crud/bet.py::createBet` | 정상 베팅 상태 변경 | 투표 완료, 같은 선택지, 잔액 충분, amount 양수 | User, Poll, Option, Vote 조회 Mock | userId, pollId, optionId, amount | Bet 생성, credit 차감 후 100 보상 |
 | UT-WB-BET-02 | `app/crud/bet.py::createBet` | 베팅 포기 경로 | 투표 완료, 같은 선택지, amount 0 | User, Poll, Option, Vote 조회 Mock | amount 0 | Bet 생성, credit 차감 없음, 참여 보상 없음 |
 | UT-WB-BET-03 | `app/crud/bet.py::createBet` | 실패 분기 | 사용자 없음, 음수 금액, Poll 없음, 종료됨, 투표 없음, 옵션 불일치, 중복, 잔액 부족 | 각 상황별 DB 조회 Mock | userId, pollId, optionId, amount | 각 상황에 맞는 실패 코드 반환 |
 | UT-WB-BET-04 | `app/crud/bet.py::getBetHistoryByUserId` | 정렬 경로 | 베팅 이력 있음, 없음 | Bet query 결과 Mock | userId | created_at 내림차순 목록 또는 빈 목록 반환 |
 | UT-WB-BET-05 | `app/crud/bet.py::createBet` | 선택지 유효성 분기 | 투표 옵션 개수 부족, optionId가 A/B가 아님 | PollOption 조회 결과와 요청 optionId를 케이스별로 Mock | optionId | 유효하지 않은 선택지는 `INVALID_POLL_OPTIONS` 또는 옵션 불일치 코드 반환 |
 | UT-WB-BET-06 | `app/api/endpoints/bet.py::createBetParticipation`, `getMyBetHistory` | endpoint 결과 매핑 | 베팅 성공, 포기, 미투표, 종료, 중복, 잔액 부족, 이력 있음/없음 | crudBet 반환값을 결과 코드별로 Mock | pollId, BetCreate | 성공/포기 메시지 또는 결과 코드별 `HTTPException`, 이력 응답 목록 반환 |
-| BET2-UT-01 | `app/crud/bet.py::createBet` | 베팅 금액 경계 | amount 1 베팅의 credit 변화 | User credit 1000, 투표 완료 | amount=1 | 1 credit 차감 후 참여 보상 100 credit 지급, 최종 credit 1099 |
-| BET2-UT-02 | `app/crud/bet.py::createBet` | 베팅 금액 경계 | amount 99 베팅의 credit 변화 | User credit 1000, 투표 완료 | amount=99 | 99 credit 차감 후 참여 보상 100 credit 지급, 최종 credit 1001 |
-| BET2-UT-03 | `app/crud/bet.py::createBet` | 베팅 금액 경계 | amount 100 베팅의 credit 변화 | User credit 1000, 투표 완료 | amount=100 | 차감 100과 보상 100으로 credit 순변화 없음 |
-| BET2-UT-04 | `app/crud/bet.py::createBet` | 베팅 금액 경계 | amount 101 베팅의 credit 변화 | User credit 1000, 투표 완료 | amount=101 | credit 순감 1 |
-| BET2-UT-05 | `app/crud/bet.py::createBet` | 베팅 포기 상태 | amount 0 베팅이 Bet과 hasBet 상태를 만드는지 확인 | 투표 완료, 중복 Bet 없음 | amount=0 | Bet 생성, credit 변화 없음 |
-| BET2-UT-06 | `app/crud/bet.py::createBet` | 포기 후 재베팅 제한 | amount 0 Bet이 이미 있는 상태에서 유료 베팅 | alreadyBet Mock | amount>0 | `ALREADY_BET`, credit 변경 없음 |
-| BET2-UT-07 | `app/crud/bet.py::createBet` | 선택지 불일치 차단 | 투표한 option과 다른 option에 베팅 | Vote option_id와 selectedOption.id 불일치 | optionId | `VOTE_OPTION_MISMATCH`, credit/Bet 변경 없음 |
-| BET2-UT-08 | `app/crud/bet.py::createBet` | 잔액 부족 경계 | 잔액보다 1 큰 금액 베팅 | User credit 99 | amount=100 | `INSUFFICIENT_CREDIT`, credit/Bet 변경 없음 |
-| BET2-UT-09 | `app/crud/bet.py::createBet` | 잔액 정확히 일치 경계 | 잔액과 같은 금액 베팅 | User credit 100 | amount=100 | 성공 후 참여 보상 100 credit이 남음 |
-| BET2-UT-10 | `app/crud/bet.py::createBet` | 트랜잭션 실패 경로 | commit 실패 | db.commit이 SQLAlchemyError 발생 | 정상 베팅 입력 | rollback 호출 및 예외 전파 |
+| UT-WB-BET-07 | `app/crud/bet.py::createBet` | 베팅 금액 경계 | amount 1 베팅의 credit 변화 | User credit 1000, 투표 완료 | amount=1 | 1 credit 차감 후 참여 보상 100 credit 지급, 최종 credit 1099 |
+| UT-WB-BET-08 | `app/crud/bet.py::createBet` | 베팅 금액 경계 | amount 99 베팅의 credit 변화 | User credit 1000, 투표 완료 | amount=99 | 99 credit 차감 후 참여 보상 100 credit 지급, 최종 credit 1001 |
+| UT-WB-BET-09 | `app/crud/bet.py::createBet` | 베팅 금액 경계 | amount 100 베팅의 credit 변화 | User credit 1000, 투표 완료 | amount=100 | 차감 100과 보상 100으로 credit 순변화 없음 |
+| UT-WB-BET-10 | `app/crud/bet.py::createBet` | 베팅 금액 경계 | amount 101 베팅의 credit 변화 | User credit 1000, 투표 완료 | amount=101 | credit 순감 1 |
+| UT-WB-BET-11 | `app/crud/bet.py::createBet` | 베팅 포기 상태 | amount 0 베팅이 Bet과 hasBet 상태를 만드는지 확인 | 투표 완료, 중복 Bet 없음 | amount=0 | Bet 생성, credit 변화 없음 |
+| UT-WB-BET-12 | `app/crud/bet.py::createBet` | 포기 후 재베팅 제한 | amount 0 Bet이 이미 있는 상태에서 유료 베팅 | alreadyBet Mock | amount>0 | `ALREADY_BET`, credit 변경 없음 |
+| UT-WB-BET-13 | `app/crud/bet.py::createBet` | 선택지 불일치 차단 | 투표한 option과 다른 option에 베팅 | Vote option_id와 selectedOption.id 불일치 | optionId | `VOTE_OPTION_MISMATCH`, credit/Bet 변경 없음 |
+| UT-WB-BET-14 | `app/crud/bet.py::createBet` | 잔액 부족 경계 | 잔액보다 1 큰 금액 베팅 | User credit 99 | amount=100 | `INSUFFICIENT_CREDIT`, credit/Bet 변경 없음 |
+| UT-WB-BET-15 | `app/crud/bet.py::createBet` | 잔액 정확히 일치 경계 | 잔액과 같은 금액 베팅 | User credit 100 | amount=100 | 성공 후 참여 보상 100 credit이 남음 |
+| UT-WB-BET-16 | `app/crud/bet.py::createBet` | 트랜잭션 실패 경로 | commit 실패 | db.commit이 SQLAlchemyError 발생 | 정상 베팅 입력 | rollback 호출 및 예외 전파 |
 | UT-WB-RESULT-01 | `app/crud/poll_result.py::evaluatePollResult` | 판정 성공 경로 | 만료된 ONGOING 투표 | Poll과 PollOption 조회 Mock | pollId | poll.status가 ENDED 또는 INVALID로 변경 |
 | UT-WB-RESULT-02 | `app/crud/poll_result.py::evaluatePollResult` | 판정 실패 분기 | Poll 없음, 이미 판정됨, 아직 진행 중, 옵션 부족 | 각 상황별 DB 조회 Mock | pollId | `POLL_NOT_FOUND`, `ALREADY_EVALUATED`, `POLL_STILL_ONGOING`, `NOT_ENOUGH_OPTIONS` 반환 |
 | UT-WB-PAYOUT-02 | `app/crud/payout.py::payoutDividends` | 정산 성공 경로 | 종료된 투표, 승자/패자 베팅 존재 | Poll, Option, Bet, User, Settlement 조회 Mock | pollId | Bet result/reward, User credit, Settlement status 변경 |
@@ -189,15 +189,15 @@
 | UT-WB-TITLE-03 | `app/crud/title.py::getShopTitles`, `getOwnedTitleIds`, `getUserInventoryTitles` | 조회 경로 | 보유 데이터 있음, 없음, ownership table 없음 | DB query와 inspect 결과 Mock | userId | 상점 목록, 보유 titleId set, 인벤토리 목록 반환 |
 | UT-WB-TITLE-04 | `app/crud/title.py::unequipTitle` | 해제 단독 분기 | 사용자 있음, 사용자 없음 | User 조회 결과를 케이스별로 Mock | userId | 사용자가 있으면 equipped_title_id가 None, 없으면 `USER_NOT_FOUND` 반환 |
 | UT-WB-TITLE-05 | `app/api/endpoints/title.py::getTitleShopList`, `purchaseTitle`, `updateEquippedTitle`, `getTitleInventory` | endpoint 결과 매핑 | 상점 조회, 구매 실패 코드, 장착/해제 실패 코드, 인벤토리 있음/없음 | title CRUD 반환값을 케이스별로 Mock | titleId, EquipTitleRequest | 정상 응답 또는 결과 코드별 `HTTPException`, 보유 여부와 장착 여부 반영 |
-| TITLE2-UT-01 | `app/crud/title.py::purchaseTitle` | 구매 금액 경계 | title 가격과 credit이 정확히 같은 경우 | User credit == title.price | userId, titleId | 구매 성공, credit 0, UserTitle 생성 |
-| TITLE2-UT-02 | `app/crud/title.py::purchaseTitle` | 잔액 부족 경계 | title 가격보다 credit이 1 부족한 경우 | User credit = price - 1 | userId, titleId | `INSUFFICIENT_CREDIT`, credit/UserTitle 변경 없음 |
-| TITLE2-UT-03 | `app/crud/title.py::purchaseTitle` | 중복 구매 차단 | 이미 보유한 title 구매 | UserTitle 조회 결과 있음 | userId, titleId | `ALREADY_OWNED`, credit 변경 없음 |
-| TITLE2-UT-04 | `app/crud/title.py::purchaseTitle` | 0원 칭호 경계 | price 0 title 구매 | title.price = 0 | userId, titleId | 구매 성공, credit 변화 없음 |
-| TITLE2-UT-05 | `app/crud/title.py::purchaseTitle` | 음수 가격 방어 | 음수 price title 구매 | title.price < 0 | userId, titleId | credit이 증가하지 않아야 함 |
-| TITLE2-UT-06 | `app/crud/title.py::purchaseTitle` | 트랜잭션 실패 경로 | commit 실패 | db.commit이 SQLAlchemyError 발생 | userId, titleId | rollback 호출 및 예외 전파 |
-| TITLE2-UT-07 | `app/crud/title.py::equipTitle` | 미보유 장착 차단 | 보유하지 않은 title 장착 | UserTitle 조회 결과 None | userId, titleId | `TITLE_NOT_OWNED`, equipped_title_id 변경 없음 |
-| TITLE2-UT-08 | `app/crud/title.py::equipTitle` | 중복 장착 차단 | 이미 장착한 title 재장착 | equipped_title_id == titleId | userId, titleId | `ALREADY_EQUIPPED`, 상태 유지 |
-| TITLE2-UT-09 | `app/crud/title.py::unequipTitle` | 해제 no-op 경로 | 장착 칭호가 없는 상태에서 해제 | equipped_title_id None | userId | 성공 여부와 equipped_title_id None 유지 확인 |
+| UT-WB-TITLE-06 | `app/crud/title.py::purchaseTitle` | 구매 금액 경계 | title 가격과 credit이 정확히 같은 경우 | User credit == title.price | userId, titleId | 구매 성공, credit 0, UserTitle 생성 |
+| UT-WB-TITLE-07 | `app/crud/title.py::purchaseTitle` | 잔액 부족 경계 | title 가격보다 credit이 1 부족한 경우 | User credit = price - 1 | userId, titleId | `INSUFFICIENT_CREDIT`, credit/UserTitle 변경 없음 |
+| UT-WB-TITLE-08 | `app/crud/title.py::purchaseTitle` | 중복 구매 차단 | 이미 보유한 title 구매 | UserTitle 조회 결과 있음 | userId, titleId | `ALREADY_OWNED`, credit 변경 없음 |
+| UT-WB-TITLE-09 | `app/crud/title.py::purchaseTitle` | 0원 칭호 경계 | price 0 title 구매 | title.price = 0 | userId, titleId | 구매 성공, credit 변화 없음 |
+| UT-WB-TITLE-10 | `app/crud/title.py::purchaseTitle` | 음수 가격 방어 | 음수 price title 구매 | title.price < 0 | userId, titleId | credit이 증가하지 않아야 함 |
+| UT-WB-TITLE-11 | `app/crud/title.py::purchaseTitle` | 트랜잭션 실패 경로 | commit 실패 | db.commit이 SQLAlchemyError 발생 | userId, titleId | rollback 호출 및 예외 전파 |
+| UT-WB-TITLE-12 | `app/crud/title.py::equipTitle` | 미보유 장착 차단 | 보유하지 않은 title 장착 | UserTitle 조회 결과 None | userId, titleId | `TITLE_NOT_OWNED`, equipped_title_id 변경 없음 |
+| UT-WB-TITLE-13 | `app/crud/title.py::equipTitle` | 중복 장착 차단 | 이미 장착한 title 재장착 | equipped_title_id == titleId | userId, titleId | `ALREADY_EQUIPPED`, 상태 유지 |
+| UT-WB-TITLE-14 | `app/crud/title.py::unequipTitle` | 해제 no-op 경로 | 장착 칭호가 없는 상태에서 해제 | equipped_title_id None | userId | 성공 여부와 equipped_title_id None 유지 확인 |
 | UT-WB-ENV-02 | `app/db/session.py::setTimeZone` | DB 연결 이벤트 | connect event 실행 | DBAPI connection/cursor Mock | dbapiConnection | `SET TIME ZONE 'Asia/Seoul'` 실행 후 cursor close |
 | UT-WB-ENV-03 | `app/core/time.py::now_kst`, `now_kst_naive` | 시간대 변환 | timezone 포함 KST 반환, timezone 제거 반환 | datetime.now 결과 또는 ZoneInfo 기준 준비 | 없음 | now_kst는 Asia/Seoul timezone 포함, now_kst_naive는 tzinfo 없는 datetime 반환 |
 | UT-WB-ENV-04 | `app/main.py::readRoot`, `start_scheduler`, `stop_scheduler` | 앱 보조 함수 분기 | root 응답, scheduler 미실행/실행 상태, shutdown 호출 | scheduler.running과 start/shutdown Mock | 없음 | root message 반환, 실행 중이 아니면 start 호출, 종료 시 shutdown 호출 |
@@ -286,7 +286,7 @@ SYSTEM_BASE_URL=http://localhost:8002 SYSTEM_WS_URL=ws://localhost:8002 SYSTEM_D
 
 통과율은 `Pass / (Pass + Fail) × 100`으로 계산하였다.
 
-단위 테스트는 기존 단위 테스트와 핵심 도메인 단위 테스트를 합쳐 95개 유효 테스트 ID를 실행했다. 기존 단위 테스트는 75개 pytest 테스트 함수로 실행되어 `75 passed, 14 warnings`였고, 핵심 도메인 단위 테스트는 29개 pytest 테스트 함수로 실행되어 `26 passed, 3 failed`였다. 다만 기존 단위 테스트 중 `UT-WB-VOTE-04`는 User 또는 PollStat이 없어도 Vote가 생성되는 현재 구현 동작을 Pass로 기록했으나, 핵심 도메인 재점검에서 데이터 무결성 기대 결과와 모순되는 것으로 판단하여 유효 테스트 ID 집계에서 제외하고 `VOTE2-UT-05`, `VOTE2-UT-06` 실패 케이스로 대체하였다. 경고는 Pydantic/FastAPI deprecation warning과 passlib 관련 warning이며, 테스트 실패로 처리하지 않았다.
+단위 테스트는 기존 단위 테스트와 핵심 도메인 단위 테스트를 합쳐 95개 유효 테스트 ID를 실행했다. 기존 단위 테스트는 75개 pytest 테스트 함수로 실행되어 `75 passed, 14 warnings`였고, 핵심 도메인 단위 테스트는 29개 pytest 테스트 함수로 실행되어 `26 passed, 3 failed`였다. 다만 기존 단위 테스트 중 `UT-WB-VOTE-04`는 User 또는 PollStat이 없어도 Vote가 생성되는 현재 구현 동작을 Pass로 기록했으나, 핵심 도메인 재점검에서 데이터 무결성 기대 결과와 모순되는 것으로 판단하여 유효 테스트 ID 집계에서 제외하고 `UT-WB-VOTE-10`, `UT-WB-VOTE-11` 실패 케이스로 대체하였다. 경고는 Pydantic/FastAPI deprecation warning과 passlib 관련 warning이며, 테스트 실패로 처리하지 않았다.
 
 통합 테스트는 8개 테스트 ID를 8개 pytest 테스트 함수로 실행했으며, 실행 결과는 `8 passed, 15 warnings`이다. 경고는 TestClient, Pydantic/FastAPI deprecation warning과 passlib 관련 warning이며, 테스트 실패로 처리하지 않았다.
 
@@ -335,7 +335,7 @@ SYSTEM_BASE_URL=http://localhost:8002 SYSTEM_WS_URL=ws://localhost:8002 SYSTEM_D
 | UT-WB-VOTE-01 | 1차 | Pass | 정상 투표 시 Vote 생성, option vote_count 증가, total_votes 증가, user credit 증가가 확인됨 |
 | UT-WB-VOTE-02 | 1차 | Pass | 없는 투표, 종료 투표, 생성자 투표, 중복 투표, 잘못된 선택지 실패 코드가 반환됨 |
 | UT-WB-VOTE-03 | 1차 | Pass | 사용자 투표 이력이 있으면 created_at 내림차순 query 결과를 반환하고, 이력이 없으면 빈 목록을 반환함 |
-| UT-WB-VOTE-04 | 1차 | Excluded | User 또는 PollStat이 없어도 Vote가 생성되는 현재 구현 동작을 확인한 항목이나, `VOTE2-UT-05`, `VOTE2-UT-06`의 데이터 무결성 기대 결과와 모순되어 유효 결과 집계에서 제외함 |
+| UT-WB-VOTE-04 | 1차 | Excluded | User 또는 PollStat이 없어도 Vote가 생성되는 현재 구현 동작을 확인한 항목이나, `UT-WB-VOTE-10`, `UT-WB-VOTE-11`의 데이터 무결성 기대 결과와 모순되어 유효 결과 집계에서 제외함 |
 | UT-WB-VOTE-05 | 1차 | Pass | 투표 endpoint가 성공 응답과 중복/없는 투표/종료/생성자 예외를 처리하고, 내 투표 이력은 목록 또는 빈 목록으로 응답함 |
 | UT-WB-BET-01 | 1차 | Pass | 정상 베팅 시 Bet이 생성되고 credit 차감 후 참여 보상 지급 흐름이 확인됨 |
 | UT-WB-BET-02 | 1차 | Pass | amount 0 베팅은 Bet이 생성되지만 credit 차감과 참여 보상이 발생하지 않음 |
@@ -379,32 +379,32 @@ SYSTEM_BASE_URL=http://localhost:8002 SYSTEM_WS_URL=ws://localhost:8002 SYSTEM_D
 | ST-BB-ENV-02 | 1차 | Pass | seed.sql 적용 후 demo 계정 로그인이 성공하고 투표 목록과 칭호 상점 데이터가 조회됨 |
 | ST-BB-E2E-01 | 1차 | Pass | 실제 API 서버에서 회원가입/로그인, 투표 생성, 투표 참여, 베팅, 칭호 구매/장착이 연속 성공하고 DB의 credit, equipped_title_id, Vote, Bet 상태가 일관됨 |
 | ST-BB-E2E-02 | 1차 | Pass | 만료 처리한 투표가 스케줄러에 의해 ENDED/COMPLETED로 변경되고 WebSocket으로 POLL_END와 PAYOUT_COMPLETE 알림을 수신함 |
-| VOTE2-UT-01 | 1차 | Pass | 정상 투표 시 Vote 객체가 생성되고 poll_id, user_id, option_id가 선택지와 일치함 |
-| VOTE2-UT-02 | 1차 | Pass | 정상 투표 시 대상 PollOption의 vote_count가 1회 증가함 |
-| VOTE2-UT-03 | 1차 | Pass | 정상 투표 시 PollStat total_votes가 1회 증가함 |
-| VOTE2-UT-04 | 1차 | Pass | 정상 투표 시 사용자 credit이 100 증가함 |
-| VOTE2-UT-05 | 1차 | Fail | 기대 결과는 User가 없으면 Vote 미생성이었으나 실제로 Vote가 생성되고 SUCCESS가 반환됨 |
-| VOTE2-UT-06 | 1차 | Fail | 기대 결과는 PollStat이 없으면 집계 불일치 방지를 위해 실패였으나 실제로 Vote와 option vote_count가 갱신되고 SUCCESS가 반환됨 |
-| VOTE2-UT-07 | 1차 | Pass | 이미 투표한 사용자는 ALREADY_VOTED가 반환되고 add/commit이 호출되지 않음 |
-| VOTE2-UT-08 | 1차 | Pass | 생성자 투표는 CREATOR_CANNOT_VOTE가 반환되고 add/commit이 호출되지 않음 |
-| VOTE2-UT-09 | 1차 | Pass | poll end_time이 현재 시각과 같으면 종료된 poll로 처리되어 POLL_CLOSED가 반환됨 |
-| VOTE2-UT-10 | 1차 | Pass | commit 실패 시 rollback이 호출되고 SQLAlchemyError가 전파됨 |
-| BET2-UT-01 | 1차 | Pass | amount 1 베팅은 1 credit 차감 후 참여 보상 100 credit이 지급되어 credit이 1099가 됨 |
-| BET2-UT-02 | 1차 | Pass | amount 99 베팅은 99 credit 차감 후 참여 보상 100 credit이 지급되어 credit이 1001이 됨 |
-| BET2-UT-03 | 1차 | Pass | amount 100 베팅은 차감 100과 참여 보상 100으로 credit 순변화가 없음 |
-| BET2-UT-04 | 1차 | Pass | amount 101 베팅은 credit이 1 감소함 |
-| BET2-UT-05 | 1차 | Pass | amount 0 베팅은 Bet을 생성하고 credit은 변경하지 않음 |
-| BET2-UT-06 | 1차 | Pass | amount 0 Bet이 이미 있으면 유료 베팅은 ALREADY_BET로 거부되고 credit 변경이 없음 |
-| BET2-UT-07 | 1차 | Pass | 투표 선택지와 다른 선택지 베팅은 VOTE_OPTION_MISMATCH로 거부되고 credit/Bet 변경이 없음 |
-| BET2-UT-08 | 1차 | Pass | 잔액보다 1 큰 금액 베팅은 INSUFFICIENT_CREDIT으로 거부되고 credit/Bet 변경이 없음 |
-| BET2-UT-09 | 1차 | Pass | 잔액과 같은 금액 베팅은 성공하고 참여 보상 100 credit이 남음 |
-| BET2-UT-10 | 1차 | Pass | commit 실패 시 rollback이 호출되고 SQLAlchemyError가 전파됨 |
-| TITLE2-UT-01 | 1차 | Pass | title 가격과 credit이 같으면 구매 성공 후 credit이 0이 되고 UserTitle이 생성됨 |
-| TITLE2-UT-02 | 1차 | Pass | title 가격보다 credit이 1 부족하면 INSUFFICIENT_CREDIT으로 거부되고 상태 변경이 없음 |
-| TITLE2-UT-03 | 1차 | Pass | 이미 보유한 title 구매는 ALREADY_OWNED로 거부되고 credit 변경이 없음 |
-| TITLE2-UT-04 | 1차 | Pass | price 0 title 구매는 성공하고 credit 변화가 없음 |
-| TITLE2-UT-05 | 1차 | Fail | 기대 결과는 음수 price title 구매 거부였으나 실제로 구매 성공 처리되고 사용자 credit이 100 증가함 |
-| TITLE2-UT-06 | 1차 | Pass | commit 실패 시 rollback이 호출되고 SQLAlchemyError가 전파됨 |
-| TITLE2-UT-07 | 1차 | Pass | 보유하지 않은 title 장착은 TITLE_NOT_OWNED로 거부되고 equipped_title_id 변경이 없음 |
-| TITLE2-UT-08 | 1차 | Pass | 이미 장착한 title 재장착은 ALREADY_EQUIPPED로 거부되고 상태가 유지됨 |
-| TITLE2-UT-09 | 1차 | Pass | 장착 칭호가 없는 상태의 해제 요청은 성공하고 equipped_title_id는 None으로 유지됨 |
+| UT-WB-VOTE-06 | 1차 | Pass | 정상 투표 시 Vote 객체가 생성되고 poll_id, user_id, option_id가 선택지와 일치함 |
+| UT-WB-VOTE-07 | 1차 | Pass | 정상 투표 시 대상 PollOption의 vote_count가 1회 증가함 |
+| UT-WB-VOTE-08 | 1차 | Pass | 정상 투표 시 PollStat total_votes가 1회 증가함 |
+| UT-WB-VOTE-09 | 1차 | Pass | 정상 투표 시 사용자 credit이 100 증가함 |
+| UT-WB-VOTE-10 | 1차 | Fail | 기대 결과는 User가 없으면 Vote 미생성이었으나 실제로 Vote가 생성되고 SUCCESS가 반환됨 |
+| UT-WB-VOTE-11 | 1차 | Fail | 기대 결과는 PollStat이 없으면 집계 불일치 방지를 위해 실패였으나 실제로 Vote와 option vote_count가 갱신되고 SUCCESS가 반환됨 |
+| UT-WB-VOTE-12 | 1차 | Pass | 이미 투표한 사용자는 ALREADY_VOTED가 반환되고 add/commit이 호출되지 않음 |
+| UT-WB-VOTE-13 | 1차 | Pass | 생성자 투표는 CREATOR_CANNOT_VOTE가 반환되고 add/commit이 호출되지 않음 |
+| UT-WB-VOTE-14 | 1차 | Pass | poll end_time이 현재 시각과 같으면 종료된 poll로 처리되어 POLL_CLOSED가 반환됨 |
+| UT-WB-VOTE-15 | 1차 | Pass | commit 실패 시 rollback이 호출되고 SQLAlchemyError가 전파됨 |
+| UT-WB-BET-07 | 1차 | Pass | amount 1 베팅은 1 credit 차감 후 참여 보상 100 credit이 지급되어 credit이 1099가 됨 |
+| UT-WB-BET-08 | 1차 | Pass | amount 99 베팅은 99 credit 차감 후 참여 보상 100 credit이 지급되어 credit이 1001이 됨 |
+| UT-WB-BET-09 | 1차 | Pass | amount 100 베팅은 차감 100과 참여 보상 100으로 credit 순변화가 없음 |
+| UT-WB-BET-10 | 1차 | Pass | amount 101 베팅은 credit이 1 감소함 |
+| UT-WB-BET-11 | 1차 | Pass | amount 0 베팅은 Bet을 생성하고 credit은 변경하지 않음 |
+| UT-WB-BET-12 | 1차 | Pass | amount 0 Bet이 이미 있으면 유료 베팅은 ALREADY_BET로 거부되고 credit 변경이 없음 |
+| UT-WB-BET-13 | 1차 | Pass | 투표 선택지와 다른 선택지 베팅은 VOTE_OPTION_MISMATCH로 거부되고 credit/Bet 변경이 없음 |
+| UT-WB-BET-14 | 1차 | Pass | 잔액보다 1 큰 금액 베팅은 INSUFFICIENT_CREDIT으로 거부되고 credit/Bet 변경이 없음 |
+| UT-WB-BET-15 | 1차 | Pass | 잔액과 같은 금액 베팅은 성공하고 참여 보상 100 credit이 남음 |
+| UT-WB-BET-16 | 1차 | Pass | commit 실패 시 rollback이 호출되고 SQLAlchemyError가 전파됨 |
+| UT-WB-TITLE-06 | 1차 | Pass | title 가격과 credit이 같으면 구매 성공 후 credit이 0이 되고 UserTitle이 생성됨 |
+| UT-WB-TITLE-07 | 1차 | Pass | title 가격보다 credit이 1 부족하면 INSUFFICIENT_CREDIT으로 거부되고 상태 변경이 없음 |
+| UT-WB-TITLE-08 | 1차 | Pass | 이미 보유한 title 구매는 ALREADY_OWNED로 거부되고 credit 변경이 없음 |
+| UT-WB-TITLE-09 | 1차 | Pass | price 0 title 구매는 성공하고 credit 변화가 없음 |
+| UT-WB-TITLE-10 | 1차 | Fail | 기대 결과는 음수 price title 구매 거부였으나 실제로 구매 성공 처리되고 사용자 credit이 100 증가함 |
+| UT-WB-TITLE-11 | 1차 | Pass | commit 실패 시 rollback이 호출되고 SQLAlchemyError가 전파됨 |
+| UT-WB-TITLE-12 | 1차 | Pass | 보유하지 않은 title 장착은 TITLE_NOT_OWNED로 거부되고 equipped_title_id 변경이 없음 |
+| UT-WB-TITLE-13 | 1차 | Pass | 이미 장착한 title 재장착은 ALREADY_EQUIPPED로 거부되고 상태가 유지됨 |
+| UT-WB-TITLE-14 | 1차 | Pass | 장착 칭호가 없는 상태의 해제 요청은 성공하고 equipped_title_id는 None으로 유지됨 |
